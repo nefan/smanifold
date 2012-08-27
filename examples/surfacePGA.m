@@ -35,7 +35,9 @@ master = true;
 Cs = [-1 -2];
 l = [];
 for c = Cs
-    delete exitfile;
+    if exist(exitfile,'file')
+        delete exitfile;
+    end
     if master % this branch run by master process
         [Vapprox Vexact sapprox sfletcher sexact angularDiff] = runSurfacePGA(setupfile,outputDir,tmpDir,int2str(nrProcesses),exitfile,int2str(c));
         fvalDiff = 100*(sexact-sfletcher)./sfletcher; % percent

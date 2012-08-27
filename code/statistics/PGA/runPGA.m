@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [Vexact Vapprox sexact sapprox sfletcher angularDiff] = runPGA(xi,mean,nr,tol,DF,Exp,Log,dExp,d2Exp,varargin)
+function [Vexact Vapprox sexact sapprox sfletcher angularDiff] = runPGA(xi,mean,nr,tol,manifold,varargin)
 % 
 % runs PGA computations
 %
@@ -26,22 +26,22 @@ fprintf('PGAs...\n');
 
 m = size(mean,1);
 
-B =  null(DF(mean));
+B = manifold.orthonormalFrame(mean);
 if size(varargin,2) >= 1
     B = varargin{1};
 end
 fprintf('   approximated PGA\n');
 tic
-[Vapprox sapprox] = approxPGA(xi,mean,B,Log);
+[Vapprox sapprox] = approxPGA(xi,mean,B,manifold.Log);
 toc
 sapprox % debug
-c = curvature(mean,Vapprox(:,1),Vapprox(:,2),m,Exp,dExp,tol);
+c = curvature(mean,Vapprox(:,1),Vapprox(:,2),manifold,tol);
 Vapprox = Vapprox(:,1:nr);
 sapprox = sapprox(1:nr);
 fprintf('   curvature at first approx PGA plane: %e\n',c);
 fprintf('   exact PGA\n');
 tic
-[Vexact sexact sfletcher sfletchernoproj estimate RsDiff] = exactPGA(xi,mean,nr,B,tol,DF,Log,Exp,dExp,d2Exp,Vapprox);
+[Vexact sexact sfletcher sfletchernoproj estimate RsDiff] = exactPGA(xi,mean,nr,B,tol,manifold,Vapprox);
 toc
 
 sapprox

@@ -87,13 +87,13 @@ dimM = m-n;
 F = @(x) sum(C'.*(x.^2))-1.0;
 DF = @(x) 2*C.*x';
 D2F = @(x) 2.0*diag(C);
-[distM Exp Log LogInit dExp d2Exp] = ExpLogMaps(m,n,F,DF,D2F,tol);
+manifold = embeddedManifold(m,n,F,DF,D2F,tol);
 
 % tangent space
 if ~exist('B','var')
-	B = null(DF(p));
+	B = manifold.orthFrame(p);
 else
-	assert(norm(DF(p)*B) < epsilon);
+	assert(manifold.isTangent(B,p));
 end
 
 % data
@@ -105,7 +105,7 @@ axis equal
 dataM = [];
 for i = 1:N
     x2 = data2d(:,i);
-    [x v] = Exp(p,B*x2);
+    [x v] = manifold.Exp(p,B*x2);
     y3 = x;
         
     dataM(:,i) = y3;
@@ -161,7 +161,7 @@ if false
 end
 
 % PGA
-[Vexact Vapprox sexact sapprox sfletcher angularDiff] = runPGA(dataM,p,2,tol,DF,Exp,Log,dExp,d2Exp,B);
+[Vexact Vapprox sexact sapprox sfletcher angularDiff] = runPGA(dataM,p,2,tol,manifold);
 
 % visualization
 % approximated PGA
