@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [V s u] = approxPGA(xi,mean,B,Log)
+function [V s u] = approxPGA(xi,mean,B,manifold)
 %
 % Compute the PGA (Principal Geodesic Analysis) of
 % the samples xi in the orthonormal basis B of T_mean M
@@ -39,7 +39,7 @@ parameterCell = cell(1,N);
 for j = 1:N
     parameterCell{j} = {mean,xi(:,j)};                        
 end        
-resultCell = startmulticoremaster(Log, parameterCell, multicoreSettings.conf);
+resultCell = startmulticoremaster(manifold.Log, parameterCell, multicoreSettings.conf);
 for j = 1:N
     u(:,j) = B'*resultCell{j};
 end

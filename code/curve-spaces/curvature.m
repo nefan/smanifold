@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function c = curvature(p,v1,v2,m,Exp,dExp,tol)
+function c = curvature(p,v1,v2,manifold,tol)
 %
 % measure sectional curvature of manifold
 %
@@ -37,11 +37,11 @@ lastc = 0;
 ls = [];
 ts = [];
 while abs(c-lastc) > tol
-    [x v solExp] = Exp(p,v1,inttol*t,t);
-    [B solDExp] = dExp(solExp,v2,inttol*t,t);
+    [x v solExp] = manifold.Exp(p,v1,inttol*t,t);
+    [B solDExp] = manifold.DExp(solExp,v2,inttol*t,t);
     
     lastc = c;
-    c = 6/t^3*(t-norm(getDExp(solDExp,m,t)));
+    c = 6/t^3*(t-norm(manifold.getDExp(solDExp,t)));
     %abs(c-lastc) % debug    
     
     ts(end+1) = t;

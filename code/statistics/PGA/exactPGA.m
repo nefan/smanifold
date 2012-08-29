@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [V s sapprox sfletcher estimate RsDiff] = exactPGA(data,mu,nr,B,tol,DF,Log,Exp,dExp,d2Exp,Vapprox)
+function [V s sapprox sfletcher estimate RsDiff] = exactPGA(data,mu,nr,B,tol,manifold,Vapprox)
 %
 % Compute exact PGA
 %
@@ -68,16 +68,16 @@ minGradTol = 1e-7*tol/N;
 
 % projection
 function r = Fproj(x,v,Vk,ltol)    
-    [y w R Logxy w0] = geodesicSubspaceProjection(x,mu,B*[Vk v],[],ltol,Exp,Log,dExp);
+    [y w R Logxy w0] = geodesicSubspaceProjection(x,mu,B*[Vk v],[],ltol,manifold);
     w = B'*w; % to B basis
     linVar = sum(w0.^2);
-    linR = sum(Log(Exp(mu,w0),x).^2);
+    linR = sum(manifold.Log(manifold.Exp(mu,w0),x).^2);
     r = {y,w,R,Logxy,linVar,linR};   
 end
 
 % gradient
 function r = Fgrad(x,y,w,Logxy,BVk,Bv,BVvp,ltol)    
-    [J g Bx] = geodesicSubspaceLogGradient(x,mu,y,B*w,Logxy,BVk,Bv,BVvp,ltol,mode,DF,Exp,Log,dExp,d2Exp);
+    [J g Bx] = geodesicSubspaceLogGradient(x,mu,y,B*w,Logxy,BVk,Bv,BVvp,ltol,mode,manifold);
     r = {J,g,Bx};
 end
 
@@ -98,11 +98,11 @@ function e = expectedPGADiff(mu,x,Logx,VV)
     [xx v solExp2] = Exp(mu,B*w);
     LJ2 = norm(dExp(solExp,B*rw));
     %expR = 0.5*(LJ1+LJ2);
-    expR = norm(Log(y,x));
+    expR = norm(manifold.Log(y,x));
 
     % eV
     F = dExp(solExp,VV);
-    g = -BVV*2*F'*Log(y,x);
+    g = -BVV*2*F'*manifold.Log(y,x);
     
     expV = norm(pw+g);
     
@@ -113,10 +113,10 @@ parameterCell = cell(1,N);
 for j = 1:N
     parameterCell{j} = {mu,data(:,j),tol};
 end
-resultCell = startmulticoremaster(Log, parameterCell, multicoreSettings.conf);
+resultCell = startmulticoremaster(manifold.Log, parameterCell, multicoreSettings.conf);
 Logx = [];
 for j = 1:N
-    Logx(:,j) = B'*resultCell{j};
+    manifold.Logx(:,j) = B'*resultCell{j};
 end
 
 % measure expected difference
@@ -303,7 +303,7 @@ for k = 0:nr-1
         end
         if debug && dimM == 2
             %if firstRun % for illustration
-                exactPGA2DimVis(mu,B,v,ws,gs,Logx,i,N,Exp,Log,DF)
+                exactPGA2DimVis(mu,B,v,ws,gs,Logx,i,N,manifold)
             %end
         end     
 

@@ -49,7 +49,7 @@ function [B sol] = DExp(solExp,B0,varargin)
          ltol = varargin{1};
     end
     if size(varargin,2) >= 2
-         tspan = [0 varargin{2}];quadraticE
+         tspan = [0 varargin{2}];
     end        
     sol = intDExp(B0,tspan,solExp,m,n,F,DF,D2F,true,ltol);        
     B = getDExp(sol,m,tspan(2));
@@ -145,9 +145,9 @@ function [v solExp] = Log(p0,p1,varargin)
     end    
     
     if ~exist('lguess','var')
-        [v] = shoot(p0,p1,m,n,F,DF,D2F,@lExp,@lDExp,ltol);
+        [v] = shoot(p0,p1,m,n,F,DF,D2F,@Exp,@DExp,ltol);
     else
-        [v] = shoot(p0,p1,m,n,F,DF,D2F,@lExp,@lDExp,ltol,lguess);
+        [v] = shoot(p0,p1,m,n,F,DF,D2F,@Exp,@DExp,ltol,lguess);
     end
     
 %     % debug - note that p0,p1 might be slightly off manifold causing below check to fail even if shooting worked ok
@@ -188,5 +188,6 @@ manifold.Pt = @Pt;
 manifold.Log = @Log;
 manifold.isTangent = @isTangent;
 manifold.orthonormalFrame = @orthonormalFrame;
+manifold.getDExp = @(sol,t) getDExp(sol,m,t);
 
 end
