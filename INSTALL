@@ -31,4 +31,5 @@ and extract it into thirdparty/multicore directory.
 
 
 smanifold can now be tested by starting MATLAB in the directory containing this
-file and running 'surfacePGA'.
+file and running 'surfacePGA'. If 'startup.m' is not executed automatically upon
+MATLAB startup, please run it before 'surfacePGA' in order to setup paths.
