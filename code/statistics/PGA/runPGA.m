@@ -26,7 +26,7 @@ fprintf('PGAs...\n');
 
 m = size(mean,1);
 
-B = manifold.orthonormalFrame(mean);
+B = manifold.orthFrame(mean);
 if size(varargin,2) >= 1
     B = varargin{1};
 end

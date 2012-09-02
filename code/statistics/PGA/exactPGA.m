@@ -56,7 +56,6 @@ end
 descent = 'GD'; % Gauss-Newton GN or gradient descent GD
 
 N = size(data,2);
-m = size(data,1);
 dimM = size(B,2);
 assert(nr <= dimM);
 
@@ -89,19 +88,19 @@ function e = expectedPGADiff(mu,x,Logx,VV)
     pw = BVV*BVV'*w; % projection to subspace
     rw = w-pw; % residual
     
-    [y v solExp] = Exp(mu,B*pw);
+    [y v solExp] = manifold.Exp(mu,B*pw);
 
     % eR
     LeJ = norm(rw); % length of Euclidean Jacobi field
             
-    LJ1 = norm(dExp(solExp,B*rw));
-    [xx v solExp2] = Exp(mu,B*w);
-    LJ2 = norm(dExp(solExp,B*rw));
+    LJ1 = norm(manifold.DExp(solExp,B*rw));
+    [xx v solExp2] = manifold.Exp(mu,B*w);
+    LJ2 = norm(manifold.DExp(solExp,B*rw));
     %expR = 0.5*(LJ1+LJ2);
     expR = norm(manifold.Log(y,x));
 
     % eV
-    F = dExp(solExp,VV);
+    F = manifold.DExp(solExp,VV);
     g = -BVV*2*F'*manifold.Log(y,x);
     
     expV = norm(pw+g);
@@ -116,7 +115,7 @@ end
 resultCell = startmulticoremaster(manifold.Log, parameterCell, multicoreSettings.conf);
 Logx = [];
 for j = 1:N
-    manifold.Logx(:,j) = B'*resultCell{j};
+    Logx(:,j) = B'*resultCell{j};
 end
 
 % measure expected difference

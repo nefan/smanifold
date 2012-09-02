@@ -80,37 +80,37 @@ dimM = m-n;
 F = @(x) sum(C'.*(x.^2))-1.0;
 DF = @(x) 2*C.*x';
 D2F = @(x) 2.0*diag(C);
-[distM Exp Log LogInit dExp d2Exp] = ExpLogMaps(m,n,F,DF,D2F,tol);
+manifold = embeddedManifold(m,n,F,DF,D2F,tol);
 
 % tangent space
 if ~exist('B','var')
-	B = null(DF(p));
+	B = manifold.orthFrame(p);
 else
-	assert(norm(DF(p)*B) < epsilon);
+	assert(manifold.isTangent(B,p));
 end
 
 % curvature
-curvature(p,B(:,1),B(:,2),m,Exp,dExp,tol);
-curvature(p,B(:,1),B(:,3),m,Exp,dExp,tol);
-curvature(p,B(:,1),B(:,4),m,Exp,dExp,tol);
-curvature(p,B(:,2),B(:,3),m,Exp,dExp,tol);
-curvature(p,B(:,2),B(:,4),m,Exp,dExp,tol);
-curvature(p,B(:,3),B(:,4),m,Exp,dExp,tol);
+curvature(p,B(:,1),B(:,2),manifold,tol);
+curvature(p,B(:,1),B(:,3),manifold,tol);
+curvature(p,B(:,1),B(:,4),manifold,tol);
+curvature(p,B(:,2),B(:,3),manifold,tol);
+curvature(p,B(:,2),B(:,4),manifold,tol);
+curvature(p,B(:,3),B(:,4),manifold,tol);
 
 dataM = [];
 for i = 1:N
     x2 = dataTM(:,i);
-    [x v] = Exp(p,B*x2);
+    [x v] = manifold.Exp(p,B*x2);
     y3 = x;
         
     dataM(:,i) = y3;
 end
 
 % approximated PGA
-[Vapprox sapprox] = approxPGA(dataM,p,B,Log);
+[Vapprox sapprox] = approxPGA(dataM,p,B,manifold);
 
 % real PGA
-[Vexact sexact sfletcher] = exactPGA(dataM,p,dimM,B,tol,DF,Log,Exp,dExp,d2Exp,Vapprox);
+[Vexact sexact sfletcher] = exactPGA(dataM,p,dimM,B,tol,manifold,Vapprox);
 
 Vapprox
 Vexact

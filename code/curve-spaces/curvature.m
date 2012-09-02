@@ -50,6 +50,6 @@ while abs(c-lastc) > tol
     t = t/2;    
 end
 
-ls % debug
-figure(5)
-plot(ts,ls);
+% ls % debug
+% figure(5)
+% plot(ts,ls);

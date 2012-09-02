@@ -175,7 +175,7 @@ end
         res = norm(DF(p)*V) < epsilon();
     end
 
-    function frame = orthonormalFrame(p)
+    function frame = orthFrame(p)
         frame = null(DF(p));
     end
 
@@ -187,7 +187,7 @@ manifold.D2Exp = @D2Exp;
 manifold.Pt = @Pt;
 manifold.Log = @Log;
 manifold.isTangent = @isTangent;
-manifold.orthonormalFrame = @orthonormalFrame;
+manifold.orthFrame = @orthFrame;
 manifold.getDExp = @(sol,t) getDExp(sol,m,t);
 
 end

@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [J g Bx] = geodesicSubspaceLogJacobian(x,mu,y,w,Logxy,V,v,Vvp,tol,mode,DF,Exp,Log,dExp,d2Exp)
+function [J g Bx] = geodesicSubspaceLogJacobian(x,mu,y,w,Logxy,V,v,Vvp,tol,mode,manifold)
 %
 % Compute Jacobian and gradient of either Log_\mu(\pi_{S_v}(x)) or Log_x(\pi_{S_v}(x))
 % with S_v=Exp_\mu V_v and V_v=\Span(V,v)
@@ -42,31 +42,25 @@ VvVvp = [Vv Vvp]; % full basis for T_mu M as used in the paper
 assert(all(size(VvVvp) == [m dimM]));
 assert(isOrthonormal(VvVvp));
 
-if dimM ~= m
-    By = null(DF(y)); % basis for T_y M
-    Bx = null(DF(x)); % basis for T_x M
-else
-    % Euclidean
-    By = eye(m);
-    Bx = eye(m);
-end
+By = manifold.orthFrame(y); % basis for T_y M
+Bx = manifold.orthFrame(x); % basis for T_x M
 
 % gradient of R in Vvp
-[xx vv solExpxLogxy] = Exp(x,Logxy,tol);
-dLogxyExpx = By'*dExp(solExpxLogxy,Bx,tol); % By, Bx
+[xx vv solExpxLogxy] = manifold.Exp(x,Logxy,tol);
+dLogxyExpx = By'*manifold.DExp(solExpxLogxy,Bx,tol); % By, Bx
 %dyLogx = inv(dLogxyExpx); % Bx, By - we use dLogxyExpx\ instead
-[xx vv solExpmuw] = Exp(mu,w,tol);
-[A soldwExpmu] = dExp(solExpmuw,VvVvp,tol);
+[xx vv solExpmuw] = manifold.Exp(mu,w,tol);
+[A soldwExpmu] = manifold.DExp(solExpmuw,VvVvp,tol);
 dwExpmu = By'*A; % By, VvVvp
 %gR = 2*(dyLogx*dwExpmu*VvVvp'*Vvp)'*Bx'*Logxy;
 gR = 2*(dLogxyExpx\(dwExpmu*VvVvp'*Vvp))'*Bx'*Logxy;
 
 % Hessian in (VvVvp Vv)
 HwR = [];
-D2Expmu = d2Exp(solExpmuw,VvVvp,Vv,soldwExpmu,[],tol); % RR^m, (VvVvp Vv) - recalculation of Vv-part can be avoided
+D2Expmu = manifold.D2Exp(solExpmuw,VvVvp,Vv,soldwExpmu,[],tol); % RR^m, (VvVvp Vv) - recalculation of Vv-part can be avoided
 %Vvx = dyLogx*dwExpmu*VvVvp'*Vv; % Bx
 Vvx = dLogxyExpx\(dwExpmu*VvVvp'*Vv); % Bx
-D2Expx = d2Exp(solExpxLogxy,Bx,Bx*Vvx,[],[],tol); % RR^m, (Bx Vvx)
+D2Expx = manifold.D2Exp(solExpxLogxy,Bx,Bx*Vvx,[],[],tol); % RR^m, (Bx Vvx)
 assert(size(D2Expmu,3) == k+1);
 assert(size(D2Expx,3) == k+1);
 for i = 1:k+1
