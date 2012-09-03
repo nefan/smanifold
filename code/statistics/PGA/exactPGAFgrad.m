@@ -57,14 +57,14 @@ if debug
     timeGrad = timeGrad + toc;
 end   
 gs = []; % mainly for visualization
-dimM = size(B,2);
-g = zeros(dimM,1);        
-Js = zeros(dimM*N,dimM-(k+1));   
+manifold.dim = size(B,2);
+g = zeros(manifold.dim,1);        
+Js = zeros(manifold.dim*N,manifold.dim-(k+1));   
 for j = 1:N
     if mode == 'V'
-        Js(1+(j-1)*dimM:j*dimM,:) = B'*resultCell{j}{1}; % B, Vvp
+        Js(1+(j-1)*manifold.dim:j*manifold.dim,:) = B'*resultCell{j}{1}; % B, Vvp
     else if mode == 'R'
-            Js(1+(j-1)*dimM:j*dimM,:) = resultCell{j}{1}; % Bx, Vvp
+            Js(1+(j-1)*manifold.dim:j*manifold.dim,:) = resultCell{j}{1}; % Bx, Vvp
         else
             assert(false);
         end

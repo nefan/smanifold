@@ -25,6 +25,7 @@ function [Vapprox Vexact sapprox sfletcher sexact angularDiff] = runSurfacePGA(s
 addpath(genpath('code'));
 [sucess,message] = mkdir(tmpDir);
 
+global epsilon;
 epsilon = 10e-5;
 
 % show figures?
@@ -83,7 +84,6 @@ multicoreSettings.nrOfEvalsAtOnce = ceil(N/multicoreSettings.nrProcesses);
 format short e;
 
 % setup manifold: quadratic surface
-dimM = m-n;
 F = @(x) sum(C'.*(x.^2))-1.0;
 DF = @(x) 2*C.*x';
 D2F = @(x) 2.0*diag(C);
@@ -130,17 +130,17 @@ end
 % example for article
 if false
     % curvature
-    curvature(p,[0; 1; 0],[1; 0; 0],m,Exp,dExp,tol);
+    curvature(p,[0; 1; 0],[1; 0; 0],manifold,tol);
     
     % injectivity radius
-    [xx vv solExp] = Exp(p,[0; pi; 0]);
-    [BB solDExp] = dExp(solExp,[1; 0; 0]);
+    [xx vv solExp] = manifold.Exp(p,[0; pi; 0]);
+    [BB solDExp] = manifold.DExp(solExp,[1; 0; 0]);
     ll = []
     %tt = 0:0.06:1; % for the sphere plot
     tt = 0:0.05:1;
     for i = 1:length(tt)
         t = tt(i);
-        ll(i) = norm(getDExp(solDExp,m,t));
+        ll(i) = norm(manifold.getDExp(solDExp,t));
     end
     figure(6)
     hold on, plot(tt*pi,ll);
@@ -150,9 +150,9 @@ if false
     pp = [];
     for i = 1:length(tt)
         t = tt(i);
-        p = getExp(solExp,DF,t);
+        p = manifold.getExp(solExp,t);
         pp(:,i) = p;
-        v = 2.0*getDExp(solDExp,m,t);
+        v = 2.0*manifold.getDExp(solDExp,t);
         myquiver(p(1),p(2),p(3),v(1),v(2),v(3));
     end
     plot3(pp(1,:),pp(2,:),pp(3,:),'k','LineWidth',3,'MarkerFaceColor','k');
@@ -207,6 +207,4 @@ end
 endmulticore(multicoreSettings);
 
 end
-
-
 

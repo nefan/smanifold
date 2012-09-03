@@ -24,11 +24,10 @@ function [Vexact Vapprox sexact sapprox sfletcher angularDiff] = runPGA(xi,mean,
 
 fprintf('PGAs...\n');
 
-m = size(mean,1);
-
 B = manifold.orthFrame(mean);
 if size(varargin,2) >= 1
     B = varargin{1};
+    assert(manifold.isTangent(B,mean));
 end
 fprintf('   approximated PGA\n');
 tic

@@ -33,7 +33,6 @@ global multicoreSettings;
 assert(isOrthonormal(B));
 
 N = size(xi,2); % number of points
-dimM = size(B,2);
 
 parameterCell = cell(1,N);
 for j = 1:N
@@ -43,7 +42,7 @@ resultCell = startmulticoremaster(manifold.Log, parameterCell, multicoreSettings
 for j = 1:N
     u(:,j) = B'*resultCell{j};
 end
-S = zeros(dimM,dimM);
+S = zeros(manifold.dim,manifold.dim);
 for j = 1:N
     S = S + u(:,j)*u(:,j)';
 end
@@ -51,7 +50,7 @@ S = 1/N*S;
 
 [V D] = eig(S);
 V(:,end:-1:1) = V;
-V = B*V; % back to RR^m
+V = B*V; % back to coordinates or RR^m
 s = diag(D)';
 s(1,end:-1:1) = s;
 s = cumsum(s);

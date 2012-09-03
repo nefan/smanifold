@@ -32,7 +32,9 @@ assert(nrProcesses == 1);
 master = true;
 
 % loop over varying curvature contained in list Cs
-delete exitfile;
+if exist(exitfile,'file')
+    delete exitfile;
+end
 if master % this branch run by master process
     [Vapprox Vexact sapprox sfletcher sexact angularDiff] = runQuadraticPGA(setupfile,outputDir,tmpDir,int2str(nrProcesses),exitfile);
 else % slave processes

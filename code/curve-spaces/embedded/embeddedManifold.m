@@ -179,6 +179,9 @@ end
         frame = null(DF(p));
     end
 
+manifold.dim = m-n;
+assert(manifold.dim >= 1);
+
 manifold.dist = @distM;
 manifold.Exp = @Exp;
 manifold.DExp = @DExp;
@@ -188,6 +191,7 @@ manifold.Pt = @Pt;
 manifold.Log = @Log;
 manifold.isTangent = @isTangent;
 manifold.orthFrame = @orthFrame;
+manifold.getExp = @(sol,t) getExp(sol,DF,t);
 manifold.getDExp = @(sol,t) getDExp(sol,m,t);
 
 end

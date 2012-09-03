@@ -19,10 +19,14 @@
 
 function c = curvature(p,v1,v2,manifold,tol)
 %
-% measure sectional curvature of manifold
+% measure sectional curvature of manifold in span{v1,v2} plane 
+% through T_pM
 %
+% v1, v2 need not be orthogonal but must be in the tangent space 
+% of the p
 
 V = orth([v1 v2]);
+assert(manifold.isTangent(V,p));
 assert(size(V,2) == 2);
 v1 = V(:,1);
 v2 = V(:,2);

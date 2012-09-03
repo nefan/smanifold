@@ -24,6 +24,7 @@ function [Vapprox Vexact sapprox sfletcher sexact angularDiff] = runQuadraticPGA
 
 addpath(genpath('code'));
 
+global epsilon;
 epsilon = 10e-5;
 
 % show figures?
@@ -39,14 +40,19 @@ assert(exist(outputDir,'dir') > 0);
 
 % multicore setup
 global multicoreSettings;
-multicoreSettings.multicoreDir = tmpDir;
-multicoreSettings.masterIsWorker = 1;
-multicoreSettings.useWaitbar = false;
-multicoreSettings.maxEvalTimeSingle = 10000000;
+multicoreSettings.conf.multicoreDir = tmpDir;
+multicoreSettings.conf.masterIsWorker = 1;
+multicoreSettings.conf.useWaitbar = false;
+multicoreSettings.conf.maxEvalTimeSingle = 10000000;
 [status,result] = system('echo $OMPI_MCA_ns_nds_vpid'); 
 multicoreSettings.processId = sscanf(result,'%d');
 multicoreSettings.nrProcesses = sscanf(nrProcesses,'%d');
 multicoreSettings.exitFile = exitFile;
+
+if isempty(multicoreSettings.processId) % environment not setup for MPI calculations
+    assert(multicoreSettings.nrProcesses == 1);
+    multicoreSettings.processId = 0;
+end
 
 if startmulticore(multicoreSettings) % if true we exit when done
     return;
@@ -76,7 +82,6 @@ multicoreSettings.nrOfEvalsAtOnce = ceil(N/multicoreSettings.nrProcesses);
 format short e;
 
 % setup manifold: quadratic surface
-dimM = m-n;
 F = @(x) sum(C'.*(x.^2))-1.0;
 DF = @(x) 2*C.*x';
 D2F = @(x) 2.0*diag(C);
@@ -110,7 +115,7 @@ end
 [Vapprox sapprox] = approxPGA(dataM,p,B,manifold);
 
 % real PGA
-[Vexact sexact sfletcher] = exactPGA(dataM,p,dimM,B,tol,manifold,Vapprox);
+[Vexact sexact sfletcher] = exactPGA(dataM,p,manifold.dim,B,tol,manifold,Vapprox);
 
 Vapprox
 Vexact

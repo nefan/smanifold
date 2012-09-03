@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [J g Bx] = geodesicSubspaceLogJacobian(x,mu,y,w,Logxy,V,v,Vvp,tol,mode,manifold)
+function [J g Bx] = geodesicSubspaceLogGradient(x,mu,y,w,Logxy,V,v,Vvp,tol,mode,manifold)
 %
 % Compute Jacobian and gradient of either Log_\mu(\pi_{S_v}(x)) or Log_x(\pi_{S_v}(x))
 % with S_v=Exp_\mu V_v and V_v=\Span(V,v)
@@ -34,12 +34,10 @@ function [J g Bx] = geodesicSubspaceLogJacobian(x,mu,y,w,Logxy,V,v,Vvp,tol,mode,
 
 epsilon = 10e-5; % shouldn't be hardcoded
 
-m = size(x,1);
-dimM = size(V,2)+1+size(Vvp,2);
 k = size(V,2);
 Vv = [V v];
 VvVvp = [Vv Vvp]; % full basis for T_mu M as used in the paper
-assert(all(size(VvVvp) == [m dimM]));
+assert(size(VvVvp,2) == manifold.dim);
 assert(isOrthonormal(VvVvp));
 
 By = manifold.orthFrame(y); % basis for T_y M
@@ -66,8 +64,8 @@ assert(size(D2Expx,3) == k+1);
 for i = 1:k+1
     dsdExpmu = By'*D2Expmu(:,:,i); % By, (VvVvp Vv)
     dsdExpx = By'*D2Expx(:,:,i); % By, (Bx Vvx)
-    assert(all(size(dsdExpmu) == [dimM dimM]));
-    assert(all(size(dsdExpmu) == [dimM dimM]));
+    assert(all(size(dsdExpmu) == [manifold.dim manifold.dim]));
+    assert(all(size(dsdExpmu) == [manifold.dim manifold.dim]));
     
     % in B
     %HwRi = -2*(dyLogx*dsdExpx*dyLogx*dwExpmu)'*Bx'*Logxy ...
@@ -80,7 +78,7 @@ for i = 1:k+1
     
     HwR(:,i) = HwRi;
 end
-assert(all(size(HwR) == [dimM k+1]));
+assert(all(size(HwR) == [manifold.dim k+1]));
 
 % everything here in (VvVvp Vv)
 HwR = HwR'; % transpose
@@ -94,8 +92,8 @@ BB = HwR(:,k+2:end);
 % differential of \pi_{S_v} in By, Vvp
 barv = VvVvp'*Vv*invHwRVvend; % VvVvp
 wk1 = VvVvp(:,k+1)'*w;
-%barE = wk1*[zeros(dimM,1) [- invHwRVv*BB; eye(dimM-(k+1))]];
-barE = wk1*[- HwRVv\BB; eye(dimM-(k+1))];
+%barE = wk1*[zeros(manifold.dim,1) [- invHwRVv*BB; eye(manifold.dim-(k+1))]];
+barE = wk1*[- HwRVv\BB; eye(manifold.dim-(k+1))];
 dvpi = dwExpmu*(-barv*gR'+barE);
 
 if mode == 'V'
