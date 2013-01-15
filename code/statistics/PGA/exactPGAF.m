@@ -22,28 +22,12 @@ function [fval ys ws Logxys rs linfval Rs] = exactPGAF(data,v,Vk,mode,Fproj,proj
 % evaluate projections
 %
 
-global multicoreSettings;
 if debug
     global timeProj;
 end
 
 N = size(data,2);
 
-parameterCell = cell(1,N);
-for j = 1:N
-    x = data(:,j);
-            
-    parameterCell{j} = {x,v,Vk,projTol};
-end        
-% debug
-if debug
-    tic
-end
-resultCell = startmulticoremaster(Fproj, parameterCell, multicoreSettings.conf);        
-% debug
-if debug
-    timeProj = timeProj + toc;
-end        
 ws = [];
 ys = [];
 Logxys = [];
@@ -53,17 +37,28 @@ R = 0;
 Rs = [];
 linVar = 0;
 linR = 0;
-for j = 1:N
-    ys(:,j) = resultCell{j}{1};
-    ws(:,j) = resultCell{j}{2};        
-    Logxys(:,j) = resultCell{j}{4}; 
+% debug
+if debug
+    tic
+end
+parfor j = 1:N
+    x = data(:,j);
+    res = Fproj(x,v,Vk,projTol);
+
+    ys(:,j) = res{1};
+    ws(:,j) = res{2};        
+    Logxys(:,j) = res{4}; 
             
     variance = variance + sum(ws(:,j).^2);
-    R = R + resultCell{j}{3};
-    Rs(j) = resultCell{j}{3};
-    linVar = linVar + resultCell{j}{5};    
-    linR = linR + resultCell{j}{6};    
+    R = R + res{3};
+    Rs(j) = res{3};
+    linVar = linVar + res{5};    
+    linR = linR + res{6};    
 end 
+% debug
+if debug
+    timeProj = timeProj + toc;
+end        
 
 linfval = 0;
 if mode == 'V'

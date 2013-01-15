@@ -28,20 +28,13 @@ function [V s u] = approxPGA(xi,mean,B,Log)
 % u contains the data projected to the tangent space of the mean
 %
 
-global multicoreSettings;
-
 assert(isOrthonormal(B));
 
 N = size(xi,2); % number of points
 dimM = size(B,2);
 
-parameterCell = cell(1,N);
-for j = 1:N
-    parameterCell{j} = {mean,xi(:,j)};                        
-end        
-resultCell = startmulticoremaster(Log, parameterCell, multicoreSettings.conf);
-for j = 1:N
-    u(:,j) = B'*resultCell{j};
+parfor j = 1:N
+    u(:,j) = B'*Log(mean,xi(:,j));
 end
 S = zeros(dimM,dimM);
 for j = 1:N
@@ -49,7 +42,7 @@ for j = 1:N
 end
 S = 1/N*S;
 
-[V D] = eig(S);
+[V,D] = eig(S);
 V(:,end:-1:1) = V;
 V = B*V; % back to RR^m
 s = diag(D)';

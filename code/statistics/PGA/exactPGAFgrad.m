@@ -22,7 +22,6 @@ function [g Js gs] = exactPGAFgrad(data,v,ys,ws,Logxys,rs,Vk,B,k,mode,Fgrad,grad
 % evaluate projection gradients
 %
 
-global multicoreSettings;
 if debug
     global timeGrad;
 end
@@ -39,44 +38,46 @@ end
 if size(Vvp,2) > 0
     BVvp = B*Vvp;
 end  
-parameterCell = cell(1,N);
-for j = 1:N
-    x = data(:,j);
-    y = ys(:,j);            
-    w = ws(:,j);            
-    Logxy = Logxys(:,j);
-    parameterCell{j} = {x,y,w,Logxy,BVk,Bv,BVvp,gradTol};                        
-end        
-% debug
-if debug
-    tic
-end   
-resultCell = startmulticoremaster(Fgrad, parameterCell, multicoreSettings.conf);
-% debug
-if debug
-    timeGrad = timeGrad + toc;
-end   
 gs = []; % mainly for visualization
 dimM = size(B,2);
 g = zeros(dimM,1);        
 Js = zeros(dimM*N,dimM-(k+1));   
+% debug
+if debug
+    tic
+end   
+results = cell(1,N);
+parfor j = 1:N
+    x = data(:,j);
+    y = ys(:,j);            
+    w = ws(:,j);            
+    Logxy = Logxys(:,j);
+    results{j} = Fgrad(x,y,w,Logxy,BVk,Bv,BVvp,gradTol);
+end
+
 for j = 1:N
+    res = results{j};
+
     if mode == 'V'
-        Js(1+(j-1)*dimM:j*dimM,:) = B'*resultCell{j}{1}; % B, Vvp
+        Js(1+(j-1)*dimM:j*dimM,:) = B'*res{1}; % B, Vvp
     else if mode == 'R'
-            Js(1+(j-1)*dimM:j*dimM,:) = resultCell{j}{1}; % Bx, Vvp
+            Js(1+(j-1)*dimM:j*dimM,:) = res{1}; % Bx, Vvp
         else
             assert(false);
         end
     end
-	gs(:,j) = Vvp*resultCell{j}{2}; % gradient in B
+	gs(:,j) = Vvp*res{2}; % gradient in B
     g = g+gs(:,j); % accumulated gradient
             
     if mode == 'R'
-        Bx = resultCell{j}{3};                
+        Bx = res{3};                
         rs(:,j) = Bx'*Logxys(:,j); % Bx
     end
 end
+% debug
+if debug
+    timeGrad = timeGrad + toc;
+end   
 
 Js = Js/N;
 g = g/N;

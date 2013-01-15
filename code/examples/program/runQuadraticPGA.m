@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [Vapprox Vexact sapprox sfletcher sexact angularDiff] = runQuadraticPGA(setupfile,outputDir,tmpDir,nrProcesses,exitFile,varargin)
+function [Vapprox Vexact sapprox sfletcher sexact angularDiff] = runQuadraticPGA(setupfile,outputDir,tmpDir,varargin)
 %
 % run pga on quadratic manifold
 %
@@ -37,22 +37,6 @@ if exist(outputDir,'dir') == 0
 end
 assert(exist(outputDir,'dir') > 0);
 
-% multicore setup
-global multicoreSettings;
-multicoreSettings.multicoreDir = tmpDir;
-multicoreSettings.masterIsWorker = 1;
-multicoreSettings.useWaitbar = false;
-multicoreSettings.maxEvalTimeSingle = 10000000;
-[status,result] = system('echo $OMPI_MCA_ns_nds_vpid'); 
-multicoreSettings.processId = sscanf(result,'%d');
-multicoreSettings.nrProcesses = sscanf(nrProcesses,'%d');
-multicoreSettings.exitFile = exitFile;
-
-if startmulticore(multicoreSettings) % if true we exit when done
-    return;
-end
-
-
 % get setup
 evalFileName = setupfile;
 evalFile;
@@ -71,7 +55,6 @@ printFig = @(name) print([prepend name '.ps'],'-dps');
 
 % number of samples
 N = size(dataTM,2);
-multicoreSettings.nrOfEvalsAtOnce = ceil(N/multicoreSettings.nrProcesses);
 
 format short e;
 
@@ -124,7 +107,5 @@ for i = 1:size(Vexact,2)
 end
 angularDiff % degress
 save([prepend 'data.mat'],'dataTM','dataM','Vapprox','Vexact','sapprox','sfletcher','sexact','fvalDiff','angularDiff');
-
-endmulticore(multicoreSettings);
 
 end

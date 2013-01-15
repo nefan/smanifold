@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [Vapprox Vexact sapprox sfletcher sexact angularDiff] = runSurfacePGA(setupfile,outputDir,tmpDir,nrProcesses,exitFile,varargin)
+function [Vapprox Vexact sapprox sfletcher sexact angularDiff] = runSurfacePGA(setupfile,outputDir,tmpDir,varargin)
 %
 % run surface pga
 %
@@ -40,26 +40,6 @@ if exist(outputDir,'dir') == 0
 end
 assert(exist(outputDir,'dir') > 0);
 
-% multicore setup
-global multicoreSettings;
-multicoreSettings.conf.multicoreDir = tmpDir;
-multicoreSettings.conf.masterIsWorker = 1;
-multicoreSettings.conf.useWaitbar = false;
-multicoreSettings.conf.maxEvalTimeSingle = 10000000;
-[status,result] = system('echo $OMPI_MCA_ns_nds_vpid'); 
-multicoreSettings.processId = sscanf(result,'%d');
-multicoreSettings.nrProcesses = sscanf(nrProcesses,'%d');
-multicoreSettings.exitFile = exitFile;
-
-if isempty(multicoreSettings.processId) % environment not setup for MPI calculations
-    assert(multicoreSettings.nrProcesses == 1);
-    multicoreSettings.processId = 0;
-end
-
-if startmulticore(multicoreSettings) % if true we exit when done
-    return;
-end
-
 % get setup
 evalFileName = setupfile;
 evalFile;
@@ -78,7 +58,6 @@ printFig = @(name) print([prepend name '.ps'],'-dps');
 
 % number of samples
 N = size(data2d,2);
-multicoreSettings.nrOfEvalsAtOnce = ceil(N/multicoreSettings.nrProcesses);
 
 format short e;
 
@@ -203,8 +182,6 @@ printFig('TM');
 if ~visible
     close(2);
 end
-
-endmulticore(multicoreSettings);
 
 end
 

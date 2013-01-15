@@ -22,14 +22,8 @@ https://github.com/nefan/smanifold.git
 
 Installation intructions:
 
+smanifold has no external dependencies at this point.
 
-Please get the MATLAB multicore package from
-
-http://www.mathworks.com/matlabcentral/fileexchange/13775
-
-and extract it into thirdparty/multicore directory.
-
-
-smanifold can now be tested by starting MATLAB in the directory containing this
+smanifold can be tested by starting MATLAB in the directory containing this
 file and running 'surfacePGA'. If 'startup.m' is not executed automatically upon
 MATLAB startup, please run it before 'surfacePGA' in order to setup paths.

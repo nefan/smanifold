@@ -24,20 +24,12 @@
 setupfile = 'examples/setupfiles/linepgatest.m';
 outputDir = 'tmp/output';
 tmpDir = 'tmp/';
-nrProcesses = 1;
-exitfile = 'tmp/exitfile';
-
-% if running in parallel, set master = false for slave processes
-assert(nrProcesses == 1);
-master = true;
 
 % loop over varying curvature contained in list Cs
 Cs = [-1 -2];
 l = [];
 for c = Cs
-    delete exitfile;
-    if master % this branch run by master process
-        [Vapprox Vexact sapprox sfletcher sexact angularDiff] = runSurfacePGA(setupfile,outputDir,tmpDir,int2str(nrProcesses),exitfile,int2str(c));
+        [Vapprox Vexact sapprox sfletcher sexact angularDiff] = runSurfacePGA(setupfile,outputDir,tmpDir,int2str(c));
         fvalDiff = 100*(sexact-sfletcher)./sfletcher; % percent
         l(:,end+1) = [fvalDiff(1); angularDiff(1)];
 
@@ -48,7 +40,4 @@ for c = Cs
         figure(11)
         clf
         plot(Cs(1:size(l,2)),l(2,:));
-    else % slave processes
-        runSurfacePGA(setupfile,outputDir,tmpDir,int2str(nrProcesses),exitfile,int2str(c));
-    end
 end

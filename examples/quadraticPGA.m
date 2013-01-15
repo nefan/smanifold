@@ -24,17 +24,5 @@
 setupfile = 'examples/setupfiles/qpgatest.m';
 outputDir = 'tmp/output';
 tmpDir = 'tmp/';
-nrProcesses = 1;
-exitfile = 'tmp/exitfile';
 
-% if running in parallel, set master = false for slave processes
-assert(nrProcesses == 1);
-master = true;
-
-% loop over varying curvature contained in list Cs
-delete exitfile;
-if master % this branch run by master process
-    [Vapprox Vexact sapprox sfletcher sexact angularDiff] = runQuadraticPGA(setupfile,outputDir,tmpDir,int2str(nrProcesses),exitfile);
-else % slave processes
-    runQuadraticPGA(setupfile,outputDir,tmpDir,int2str(nrProcesses),exitfile);
-end
+[Vapprox Vexact sapprox sfletcher sexact angularDiff] = runQuadraticPGA(setupfile,outputDir,tmpDir);

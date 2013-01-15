@@ -31,8 +31,6 @@ epsilon = 10e-5;
 
 assert(isOrthonormal(B));
 
-global multicoreSettings;
-
 % debug
 if ~isempty(whos('global','debug'))
     global debug;
@@ -82,10 +80,10 @@ function r = Fgrad(x,y,w,Logxy,BVk,Bv,BVvp,ltol)
 end
 
 % expectation
-function e = expectedPGADiff(mu,x,Logx,VV)
+function e = expectedPGADiff(mu,x,lLogx,VV)
     assert(isOrthonormal(VV));
     BVV = B'*VV;
-    w = Logx;
+    w = lLogx;
     pw = BVV*BVV'*w; % projection to subspace
     rw = w-pw; % residual
     
@@ -97,47 +95,39 @@ function e = expectedPGADiff(mu,x,Logx,VV)
     LJ1 = norm(dExp(solExp,B*rw));
     [xx v solExp2] = Exp(mu,B*w);
     LJ2 = norm(dExp(solExp,B*rw));
-    %expR = 0.5*(LJ1+LJ2);
-    expR = norm(Log(y,x));
+    %lexpR = 0.5*(LJ1+LJ2);
+    lexpR = norm(Log(y,x));
 
     % eV
     F = dExp(solExp,VV);
     g = -BVV*2*F'*Log(y,x);
     
-    expV = norm(pw+g);
+    lexpV = norm(pw+g);
     
-    e = {norm(rw), expR, norm(pw), expV, norm(g)};
+    e = {norm(rw), lexpR, norm(pw), lexpV, norm(g)};
 end
 
-parameterCell = cell(1,N);
-for j = 1:N
-    parameterCell{j} = {mu,data(:,j),tol};
-end
-resultCell = startmulticoremaster(Log, parameterCell, multicoreSettings.conf);
 Logx = [];
-for j = 1:N
-    Logx(:,j) = B'*resultCell{j};
+parfor j = 1:N
+    Logx(:,j) = B'*Log(mu,data(:,j),tol);
 end
 
 % measure expected difference
 fprintf('Expectation on difference...\n');
 Vexpect = Vapprox(:,1);
-parameterCell = cell(1,N);
-for j = 1:N
-    parameterCell{j} = {mu,data(:,j),Logx(:,j),Vexpect};
-end
-resultCell = startmulticoremaster(@expectedPGADiff, parameterCell, multicoreSettings.conf);
 expR = [];
 expV = [];
 gV = [];
 R = [];
 V = [];
-for j = 1:N
-    R(j) = resultCell{j}{1};
-    expR(j) = resultCell{j}{2};
-    V(j) = resultCell{j}{3};
-    expV(j) = resultCell{j}{4};
-    gV(j) = resultCell{j}{5};
+fun = @expectedPGADiff;
+parfor j = 1:N
+    res = fun(mu,data(:,j),Logx(:,j),Vexpect);
+    R(j) = res{1};
+    expR(j) = res{2};
+    V(j) = res{3};
+    expV(j) = res{4};
+    gV(j) = res{5};
 end
 R % debug
 expR % debug
