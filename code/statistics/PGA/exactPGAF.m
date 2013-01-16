@@ -32,11 +32,10 @@ ws = [];
 ys = [];
 Logxys = [];
 rs = [];     
-variance = 0;
-R = 0;
+variances = [];
 Rs = [];
-linVar = 0;
-linR = 0;
+linVars = [];
+linRs = [];
 % debug
 if debug
     tic
@@ -49,12 +48,15 @@ parfor j = 1:N
     ws(:,j) = res{2};        
     Logxys(:,j) = res{4}; 
             
-    variance = variance + sum(ws(:,j).^2);
-    R = R + res{3};
+    variances(j) = sum(ws(:,j).^2);
     Rs(j) = res{3};
-    linVar = linVar + res{5};    
-    linR = linR + res{6};    
+    linVars(j) = res{5};    
+    linRs(j) = res{6};    
 end 
+variance = sum(variances);
+R = sum(Rs);
+linVar = sum(linVars);
+linR = sum(linRs);
 % debug
 if debug
     timeProj = timeProj + toc;

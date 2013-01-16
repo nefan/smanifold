@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [y w R Logxy w0] = geodesicSubspaceProjection(x,mu,V,w0,tol,Exp,Log,dExp)
+function [y w R Logxy w0] = geodesicSubspaceProjection(x,mu,V,w0,tol,manifold)
 %
 % Compute projection \pi_S(x) of x onto geodesic subspace
 % S=Exp_\mu VV, where VV=\Span V
@@ -30,19 +30,19 @@ function [y w R Logxy w0] = geodesicSubspaceProjection(x,mu,V,w0,tol,Exp,Log,dEx
 assert(isOrthonormal(V));
 
 if isempty(w0)
-    w0 = V*V'*Log(mu,x,tol); % initial guess (orthogonal projection)
+    w0 = V*V'*manifold.Log(mu,x,tol); % initial guess (orthogonal projection)
 end
 
 function [R J] = lf(w)
-    [y v solExp] = Exp(mu,V*w);
-    B = dExp(solExp,V);
+    [y v solExp] = manifold.Exp(mu,V*w);
+    B = manifold.DExp(solExp,V);
     assert(size(B,2) == size(V,2));
         
     if isempty(guess)
-        R = Log(y,x,tol);
+        R = manifold.Log(y,x,tol);
     else
         fprintf('Subspace projection using guess...\n');
-        R = Log(y,x,tol,guess);
+        R = manifold.Log(y,x,tol,guess);
     end
     %guess = R;
     
@@ -58,8 +58,8 @@ w = lsqnonlin(@lf,V'*w0,[],[],options);
 guess = [];
 
 w = V*w;
-[y v solExp] = Exp(mu,w);
-Logxy = Log(x,y,tol);
+[y v solExp] = manifold.Exp(mu,w);
+Logxy = manifold.Log(x,y,tol);
 R = sum(Logxy.^2);
 
 end

@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [V s u] = approxPGA(xi,mean,B,Log)
+function [V,s,u] = approxPGA(xi,mean,B,manifold)
 %
 % Compute the PGA (Principal Geodesic Analysis) of
 % the samples xi in the orthonormal basis B of T_mean M
@@ -31,12 +31,12 @@ function [V s u] = approxPGA(xi,mean,B,Log)
 assert(isOrthonormal(B));
 
 N = size(xi,2); % number of points
-dimM = size(B,2);
 
+u = zeros(manifold.dim,N);
 parfor j = 1:N
-    u(:,j) = B'*Log(mean,xi(:,j));
+    u(:,j) = B'*manifold.Log(mean,xi(:,j));
 end
-S = zeros(dimM,dimM);
+S = zeros(manifold.dim,manifold.dim);
 for j = 1:N
     S = S + u(:,j)*u(:,j)';
 end
@@ -44,7 +44,7 @@ S = 1/N*S;
 
 [V,D] = eig(S);
 V(:,end:-1:1) = V;
-V = B*V; % back to RR^m
+V = B*V; % back to coordinates or RR^m
 s = diag(D)';
 s(1,end:-1:1) = s;
 s = cumsum(s);

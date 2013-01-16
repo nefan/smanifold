@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [V s sapprox sfletcher estimate RsDiff] = exactPGA(data,mu,nr,B,tol,DF,Log,Exp,dExp,d2Exp,Vapprox)
+function [V s sapprox sfletcher estimate RsDiff] = exactPGA(data,mu,nr,B,tol,manifold,Vapprox)
 %
 % Compute exact PGA
 %
@@ -54,9 +54,7 @@ end
 descent = 'GD'; % Gauss-Newton GN or gradient descent GD
 
 N = size(data,2);
-m = size(data,1);
-dimM = size(B,2);
-assert(nr <= dimM);
+assert(nr <= manifold.dim);
 
 % tolerances
 projTol = 1e-3*tol/N;
@@ -66,16 +64,16 @@ minGradTol = 1e-7*tol/N;
 
 % projection
 function r = Fproj(x,v,Vk,ltol)    
-    [y w R Logxy w0] = geodesicSubspaceProjection(x,mu,B*[Vk v],[],ltol,Exp,Log,dExp);
+    [y w R Logxy w0] = geodesicSubspaceProjection(x,mu,B*[Vk v],[],ltol,manifold);
     w = B'*w; % to B basis
     linVar = sum(w0.^2);
-    linR = sum(Log(Exp(mu,w0),x).^2);
+    linR = sum(manifold.Log(manifold.Exp(mu,w0),x).^2);
     r = {y,w,R,Logxy,linVar,linR};   
 end
 
 % gradient
 function r = Fgrad(x,y,w,Logxy,BVk,Bv,BVvp,ltol)    
-    [J g Bx] = geodesicSubspaceLogGradient(x,mu,y,B*w,Logxy,BVk,Bv,BVvp,ltol,mode,DF,Exp,Log,dExp,d2Exp);
+    [J g Bx] = geodesicSubspaceLogGradient(x,mu,y,B*w,Logxy,BVk,Bv,BVvp,ltol,mode,manifold);
     r = {J,g,Bx};
 end
 
@@ -87,20 +85,20 @@ function e = expectedPGADiff(mu,x,lLogx,VV)
     pw = BVV*BVV'*w; % projection to subspace
     rw = w-pw; % residual
     
-    [y v solExp] = Exp(mu,B*pw);
+    [y v solExp] = manifold.Exp(mu,B*pw);
 
     % eR
     LeJ = norm(rw); % length of Euclidean Jacobi field
             
-    LJ1 = norm(dExp(solExp,B*rw));
-    [xx v solExp2] = Exp(mu,B*w);
-    LJ2 = norm(dExp(solExp,B*rw));
+    LJ1 = norm(manifold.DExp(solExp,B*rw));
+    [xx v solExp2] = manifold.Exp(mu,B*w);
+    LJ2 = norm(manifold.DExp(solExp,B*rw));
     %lexpR = 0.5*(LJ1+LJ2);
-    lexpR = norm(Log(y,x));
+    lexpR = norm(manifold.Log(y,x));
 
     % eV
-    F = dExp(solExp,VV);
-    g = -BVV*2*F'*Log(y,x);
+    F = manifold.DExp(solExp,VV);
+    g = -BVV*2*F'*manifold.Log(y,x);
     
     lexpV = norm(pw+g);
     
@@ -109,7 +107,7 @@ end
 
 Logx = [];
 parfor j = 1:N
-    Logx(:,j) = B'*Log(mu,data(:,j),tol);
+    Logx(:,j) = B'*manifold.Log(mu,data(:,j),tol);
 end
 
 % measure expected difference
@@ -175,7 +173,7 @@ for k = 0:nr-1
     Vk = V(:,1:k); % actually equal to V, but we use Vk in the loop    
     Vkp = []; % basis for V_k^\perp
     if k == 0
-        Vkp = eye(dimM);
+        Vkp = eye(manifold.dim);
     else
         Vkp = null(Vk');
     end
@@ -276,7 +274,7 @@ for k = 0:nr-1
             end
         end
         
-        if k == dimM-1 % nothing to do
+        if k == manifold.dim-1 % nothing to do
             stepErr = 0;
             valErr = 0;
             prevv = v;
@@ -288,18 +286,15 @@ for k = 0:nr-1
         [g Js gs] = exactPGAFgrad(data,v,ys,ws,Logxys,rs,Vk,B,k,mode,@Fgrad,gradTol,debug);
         
         % debug        
-        if false && debug
-            exactPGACheckDerivative(v,V,Vk,B,mode,data,@Fproj,projTol,fval,g,tol)
-        end
-        if debug && dimM == 2
+        if debug && manifold.dim == 2
             %if firstRun % for illustration
-                exactPGA2DimVis(mu,B,v,ws,gs,Logx,i,N,Exp,Log,DF)
+                exactPGA2DimVis(mu,B,v,ws,gs,Logx,i,N,manifold)
             %end
         end     
 
         %Js = sqrt(2/N)*Js; % seems to work better...
         g = 1/N*g; % seems to work nicely :-)
-        descentDir = zeros(dimM,1);
+        descentDir = zeros(manifold.dim,1);
         if descent == 'GD'            
             descentDir = -g;
         else if descent == 'GN'
@@ -313,7 +308,7 @@ for k = 0:nr-1
                     S(r) = ss;
                 end
                 UU1 = UU(:,1:length(S));
-                descentDir = -Vvp*VV * diag(1./S) * UU1'*reshape(rs,dimM*N,1); % debug on sign
+                descentDir = -Vvp*VV * diag(1./S) * UU1'*reshape(rs,manifold.dim*N,1); % debug on sign
             else
                 assert(false);
             end
@@ -352,15 +347,15 @@ for k = 0:nr-1
         if true % debug
             fprintf('it %d,%d: %e, %e, %e, %e, %e, %e, %e\n',...
                 k,i,fval,gn,valErr,stepErr,abs(fval-approxPGAfval),abs(fval-approxPGAfval)*100/approxPGAfval,acos(abs(dot(prevv,approxPGAv)))*360/(2*pi));
-            fname = [prepend 'exact-PGA-k-' int2str(k) '-i-' int2str(i) '.mat'];
-            save(fname,'data','mu','i','Vk','v','B','ys','ws','prevv','g','prevg','fval','prevfval','descentDir','sign','alpha','limitFactor','tol','approxPGAfval','approxPGAv','projTol','gradTol','mode');                         
+%             fname = [prepend 'exact-PGA-k-' int2str(k) '-i-' int2str(i) '.mat'];
+%             save(fname,'data','mu','i','Vk','v','B','ys','ws','prevv','g','prevg','fval','prevfval','descentDir','sign','alpha','limitFactor','tol','approxPGAfval','approxPGAv','projTol','gradTol','mode');                         
         end
     end
         
     % debug
-    if debug && dimM == 2 && k < nr-1
+    if debug && manifold.dim == 2 && k < nr-1
 		figure(4)
-        if dimM == 2
+        if manifold.dim == 2
             dir = [v(2); -v(1)];
             dir = dir/norm(dir);
         else

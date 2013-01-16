@@ -29,15 +29,15 @@ tmpDir = 'tmp/';
 Cs = [-1 -2];
 l = [];
 for c = Cs
-        [Vapprox Vexact sapprox sfletcher sexact angularDiff] = runSurfacePGA(setupfile,outputDir,tmpDir,int2str(c));
-        fvalDiff = 100*(sexact-sfletcher)./sfletcher; % percent
-        l(:,end+1) = [fvalDiff(1); angularDiff(1)];
+    [Vapprox Vexact sapprox sfletcher sexact angularDiff] = runSurfacePGA(setupfile,outputDir,tmpDir,int2str(c));
+    fvalDiff = 100*(sexact-sfletcher)./sfletcher; % percent
+    l(:,end+1) = [fvalDiff(1); angularDiff(1)];
 
-        set(0, 'DefaultFigureVisible', 'on')
-        figure(10)
-        clf
-        plot(Cs(1:size(l,2)),l(1,:));
-        figure(11)
-        clf
-        plot(Cs(1:size(l,2)),l(2,:));
+    set(0, 'DefaultFigureVisible', 'on')
+    figure(10)
+    clf
+    plot(Cs(1:size(l,2)),l(1,:));
+    figure(11)
+    clf
+    plot(Cs(1:size(l,2)),l(2,:));
 end

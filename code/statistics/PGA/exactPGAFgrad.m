@@ -39,9 +39,9 @@ if size(Vvp,2) > 0
     BVvp = B*Vvp;
 end  
 gs = []; % mainly for visualization
-dimM = size(B,2);
-g = zeros(dimM,1);        
-Js = zeros(dimM*N,dimM-(k+1));   
+manifold.dim = size(B,2);
+g = zeros(manifold.dim,1);        
+Js = zeros(manifold.dim*N,manifold.dim-(k+1));   
 % debug
 if debug
     tic
@@ -59,9 +59,9 @@ for j = 1:N
     res = results{j};
 
     if mode == 'V'
-        Js(1+(j-1)*dimM:j*dimM,:) = B'*res{1}; % B, Vvp
+        Js(1+(j-1)*manifold.dim:j*manifold.dim,:) = B'*res{1}; % B, Vvp
     else if mode == 'R'
-            Js(1+(j-1)*dimM:j*dimM,:) = res{1}; % Bx, Vvp
+            Js(1+(j-1)*manifold.dim:j*manifold.dim,:) = res{1}; % Bx, Vvp
         else
             assert(false);
         end
