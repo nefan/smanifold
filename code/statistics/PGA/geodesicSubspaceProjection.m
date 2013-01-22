@@ -35,7 +35,7 @@ end
 
 function [R J] = lf(w)
     [y v solExp] = manifold.Exp(mu,V*w);
-    B = manifold.DExp(solExp,V);
+    B = manifold.DExp(solExp,[],V);
     assert(size(B,2) == size(V,2));
         
     if isempty(guess)

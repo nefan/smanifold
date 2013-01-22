@@ -17,10 +17,10 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [V,s,u] = approxPGA(xi,mean,B,manifold)
+function [V,s,u] = approxPGA(xi,mean,manifold)
 %
 % Compute the PGA (Principal Geodesic Analysis) of
-% the samples xi in the orthonormal basis B of T_mean M
+% the samples xi in T_mean M
 %
 % V and D will be the eigenvalues and eigenvectors resp.
 % of a decomposition of the tangent space T_mean R^m
@@ -28,7 +28,7 @@ function [V,s,u] = approxPGA(xi,mean,B,manifold)
 % u contains the data projected to the tangent space of the mean
 %
 
-assert(isOrthonormal(B));
+B = manifold.orthFrame(mean);
 
 N = size(xi,2); % number of points
 

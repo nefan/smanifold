@@ -67,12 +67,12 @@ end
 function [y dy] = lmf(x) % standard
     [yy v solExp] = Exp(p0,Np0*x,inttol);
     y = yy - p1;
-    dy = DExp(solExp,Np0,inttol);  
+    dy = DExp(solExp,[],Np0,inttol);  
 end
 function [y dy] = lmfb(x) % backwards
     [yy v solExp] = Exp(p1,Np1*x,inttol);
     y = yy - p0;
-    dy = DExp(solExp,Np1,inttol);  
+    dy = DExp(solExp,[],Np1,inttol);  
 end
 
 if verbose < 2

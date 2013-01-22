@@ -17,43 +17,31 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function c = curvature(p,v1,v2,manifold,tol)
-%
-% measure sectional curvature of manifold in span{v1,v2} plane 
-% through T_pM
-%
-% v1, v2 need not be orthogonal but must be in the tangent space 
-% of the p
+% setup file for runSurfacePsubm
 
-V = orth([v1 v2]);
-assert(manifold.isTangent(V,p));
-assert(size(V,2) == 2);
-v1 = V(:,1);
-v2 = V(:,2);
+name = 'psubmtest1';
 
-inttol = tol;
-mint = 10e-5;
+m = 3;
+n = 1;
 
-t = 10e-2;
-i = 0;
-c = inf;
-lastc = 0;
-ls = [];
-ts = [];
-while abs(c-lastc) > tol
-    [x v solExp] = manifold.Exp(p,v1,inttol*t,t);
-    [B solDExp] = manifold.DExp(solExp,[],v2,inttol*t,t);
-    
-    lastc = c;
-    c = 6/t^3*(t-norm(manifold.getDExp(solDExp,t)));
-    %abs(c-lastc) % debug    
-    
-    ts(end+1) = t;
-    ls(end+1) = c;
-    
-    t = t/2;    
-end
+c = sscanf(varargin{1},'%e'); % get coefficient from parameters
+C = [c(1) 1 1]
+p = [0; 0; 1];
+B = eye(m,m-n);
 
-% ls % debug
-% figure(5)
-% plot(ts,ls);
+tol = 1e-4;
+
+nDraws = 4;
+dataRaw = [-1:1/((nDraws/2-1)/2):1; repmat(0,1,nDraws/2)]*pi*1/4;
+% dataRaw = [dataRaw dataRaw+repmat([0 0.25]',1,size(dataRaw,2))];
+shiftM = eye(2);
+v = 0*pi/32+0*pi/2;
+rotM = [cos(v) -sin(v); sin(v) cos(v)];
+data2d = rotM * shiftM * dataRaw;
+
+% exact PGA stuff
+global mode;
+mode = 'R';
+
+global debug;
+debug = true;

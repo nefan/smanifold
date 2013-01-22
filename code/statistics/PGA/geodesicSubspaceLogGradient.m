@@ -45,10 +45,10 @@ Bx = manifold.orthFrame(x); % basis for T_x M
 
 % gradient of R in Vvp
 [xx vv solExpxLogxy] = manifold.Exp(x,Logxy,tol);
-dLogxyExpx = By'*manifold.DExp(solExpxLogxy,Bx,tol); % By, Bx
+dLogxyExpx = By'*manifold.DExp(solExpxLogxy,[],Bx,tol); % By, Bx
 %dyLogx = inv(dLogxyExpx); % Bx, By - we use dLogxyExpx\ instead
 [xx vv solExpmuw] = manifold.Exp(mu,w,tol);
-[A soldwExpmu] = manifold.DExp(solExpmuw,VvVvp,tol);
+[A soldwExpmu] = manifold.DExp(solExpmuw,[],VvVvp,tol);
 dwExpmu = By'*A; % By, VvVvp
 %gR = 2*(dyLogx*dwExpmu*VvVvp'*Vvp)'*Bx'*Logxy;
 gR = 2*(dLogxyExpx\(dwExpmu*VvVvp'*Vvp))'*Bx'*Logxy;

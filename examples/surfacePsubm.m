@@ -17,43 +17,15 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function c = curvature(p,v1,v2,manifold,tol)
 %
-% measure sectional curvature of manifold in span{v1,v2} plane 
-% through T_pM
+% example locally principal submanifolds on a 2D surface
 %
-% v1, v2 need not be orthogonal but must be in the tangent space 
-% of the p
 
-V = orth([v1 v2]);
-assert(manifold.isTangent(V,p));
-assert(size(V,2) == 2);
-v1 = V(:,1);
-v2 = V(:,2);
+setupfile = 'examples/setupfiles/psubmtest1.m';
+outputDir = 'tmp/output';
 
-inttol = tol;
-mint = 10e-5;
-
-t = 10e-2;
-i = 0;
-c = inf;
-lastc = 0;
-ls = [];
-ts = [];
-while abs(c-lastc) > tol
-    [x v solExp] = manifold.Exp(p,v1,inttol*t,t);
-    [B solDExp] = manifold.DExp(solExp,[],v2,inttol*t,t);
-    
-    lastc = c;
-    c = 6/t^3*(t-norm(manifold.getDExp(solDExp,t)));
-    %abs(c-lastc) % debug    
-    
-    ts(end+1) = t;
-    ls(end+1) = c;
-    
-    t = t/2;    
+% loop over varying curvature contained in list Cs
+Cs = [1];
+for c = Cs
+    runSurfacePsubm(setupfile,outputDir,int2str(c));
 end
-
-% ls % debug
-% figure(5)
-% plot(ts,ls);
