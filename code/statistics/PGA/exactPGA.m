@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [V s sapprox sfletcher estimate RsDiff] = exactPGA(data,mu,nr,B,tol,manifold,Vapprox)
+function [V,s,sapprox,sfletcher,estimate,RsDiff] = exactPGA(data,mu,nr,B,tol,manifold,Vapprox)
 %
 % Compute exact PGA
 %
@@ -64,7 +64,7 @@ minGradTol = 1e-7*tol/N;
 
 % projection
 function r = Fproj(x,v,Vk,ltol)    
-    [y w R Logxy w0] = geodesicSubspaceProjection(x,mu,B*[Vk v],[],ltol,manifold);
+    [y,w,R,Logxy,w0] = geodesicSubspaceProjection(x,mu,B*[Vk v],[],ltol,manifold);
     w = B'*w; % to B basis
     linVar = sum(w0.^2);
     linR = sum(manifold.Log(manifold.Exp(mu,w0),x).^2);
@@ -73,7 +73,7 @@ end
 
 % gradient
 function r = Fgrad(x,y,w,Logxy,BVk,Bv,BVvp,ltol)    
-    [J g Bx] = geodesicSubspaceLogGradient(x,mu,y,B*w,Logxy,BVk,Bv,BVvp,ltol,mode,manifold);
+    [J,g,Bx] = geodesicSubspaceLogGradient(x,mu,y,B*w,Logxy,BVk,Bv,BVvp,ltol,mode,manifold);
     r = {J,g,Bx};
 end
 
@@ -85,13 +85,13 @@ function e = expectedPGADiff(mu,x,lLogx,VV)
     pw = BVV*BVV'*w; % projection to subspace
     rw = w-pw; % residual
     
-    [y v solExp] = manifold.Exp(mu,B*pw);
+    [y,v,solExp] = manifold.Exp(mu,B*pw);
 
     % eR
     LeJ = norm(rw); % length of Euclidean Jacobi field
             
     LJ1 = norm(manifold.DExp(solExp,B*rw));
-    [xx v solExp2] = manifold.Exp(mu,B*w);
+    [xx,v,solExp2] = manifold.Exp(mu,B*w);
     LJ2 = norm(manifold.DExp(solExp,B*rw));
     %lexpR = 0.5*(LJ1+LJ2);
     lexpR = norm(manifold.Log(y,x));
@@ -182,7 +182,7 @@ for k = 0:nr-1
     [VVkp skp] = PCA(LogxVkp,false); % regular PCA
     v = Vkp*VVkp(:,end); % initial guess    
 %     v = [0 1]'; % for illustration
-%     v = 1/sqrt(2)*[1 1]'; % for illustration
+    v = 1/sqrt(2)*[1 1]'; % for illustration
     
     p = 0.5; % descent direction decrease factor
     c = 0.25; % for Armijo condition
@@ -200,8 +200,8 @@ for k = 0:nr-1
     gn = inf;
     prevgn = 0;
     i = 0;
-    maxIter = 100;
-    minIter = 4;
+    maxIter = 400;
+    minIter = 1;
 %     maxIter = 1; % for illustration
 %     minIter = 1;
     
@@ -283,7 +283,7 @@ for k = 0:nr-1
         end
 
         % gradients
-        [g Js gs] = exactPGAFgrad(data,v,ys,ws,Logxys,rs,Vk,B,k,mode,@Fgrad,gradTol,debug);
+        [g Js gs Vvp] = exactPGAFgrad(data,v,ys,ws,Logxys,rs,Vk,B,k,mode,@Fgrad,gradTol,debug);
         
         % debug        
         if debug && manifold.dim == 2
@@ -295,9 +295,9 @@ for k = 0:nr-1
         %Js = sqrt(2/N)*Js; % seems to work better...
         g = 1/N*g; % seems to work nicely :-)
         descentDir = zeros(manifold.dim,1);
-        if descent == 'GD'            
+        if strcmp(descent,'GD')
             descentDir = -g;
-        else if descent == 'GN'
+        else if strcmp(descent,'GN')
                 [UU SS VV] = svd(Js);
                 S = [];
                 for r = 1:min(size(SS)) % extract non-zero singular values
@@ -308,7 +308,7 @@ for k = 0:nr-1
                     S(r) = ss;
                 end
                 UU1 = UU(:,1:length(S));
-                descentDir = -Vvp*VV * diag(1./S) * UU1'*reshape(rs,manifold.dim*N,1); % debug on sign
+                descentDir = -Vvp*VV*diag(1./S)*UU1'*reshape(rs,manifold.dim*N,1); % debug on sign
             else
                 assert(false);
             end
@@ -361,8 +361,8 @@ for k = 0:nr-1
         else
             dir = descentDir/norm(descentDir);
         end
-        %testres(5,prevv,Vk,p,alpha,sign,dir);
-        printFig(['TMdone' num2str(k)]);
+%         testres(5,prevv,Vk,p,alpha,sign,dir);
+%         printFig(['TMdone' num2str(k)]);
 		close(4)
     end 
     

@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [fval ys ws Logxys rs linfval Rs] = exactPGAF(data,v,Vk,mode,Fproj,projTol,debug)
+function [fval,ys,ws,Logxys,rs,linfval,Rs] = exactPGAF(data,v,Vk,mode,Fproj,projTol,debug)
 %
 % evaluate projections
 %

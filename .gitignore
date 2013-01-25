@@ -2,3 +2,6 @@
 tmp/
 # thirdparty packages
 thirdparty/
+
+# matlab data files
+*.mat

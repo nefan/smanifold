@@ -90,6 +90,12 @@ for i = 1:N
     dataM(:,i) = y3;
 end
 
+% ...
+p = p+[0 0.4 0]';
+p = manifold.toManifold(p);
+p = intrinsicMean(dataM,manifold,tol,p);
+B = manifold.orthFrame(p);
+
 if visible
     figure(1)
     clf
@@ -98,11 +104,13 @@ if visible
     %zrange = [-0.5+min(dataM(3,:)),0.5+max(dataM(3,:))];
     xrange = [-2.5,2.5];
     yrange = [-2.5,2.5];
-    zrange = [-0.5,2.5];
-    ImplicitPlot3D(F,xrange,yrange,zrange);
-    hold on, plot3(dataM(1,:),dataM(2,:),dataM(3,:),'ro','MarkerSize',10,'MarkerFaceColor','r');
+    zrange = [-2.5,2.5];
+    ImplicitPlot3D(F,xrange,yrange,zrange,50);
+    hold on
+    plot3(dataM(1,:),dataM(2,:),dataM(3,:),'ro','MarkerSize',10,'MarkerFaceColor','r');
+    plot3(p(1),p(2),p(3),'ko','MarkerSize',10,'MarkerFaceColor','k');
     hold off
-    axis([-2.5 2.5 -2.5 2.5 0 2.5])
+    axis([-2.5 2.5 -2.5 2.5 -2.5 2.5])
     view([16 22])
 end
 

@@ -28,7 +28,7 @@ function manifold = embeddedManifold(m,n,F,DF,D2F,tol)
 %
 
 % Exponential map
-function [x v sol] = Exp(x0,v0,varargin)
+function [x,v,sol] = Exp(x0,v0,varargin)
     ltol = tol;
     tspan = [0 1];
     if size(varargin,2) >= 1
@@ -42,7 +42,8 @@ function [x v sol] = Exp(x0,v0,varargin)
 end
 
 % DExp
-function [B sol] = DExp(solExp,B0,varargin)
+% Derivatives dx and dw for Exp_x w
+function [B,sol] = DExp(solExp,dx,dw,varargin)
     ltol = tol;
     tspan = [0 1];    
     if size(varargin,2) >= 1
@@ -51,7 +52,7 @@ function [B sol] = DExp(solExp,B0,varargin)
     if size(varargin,2) >= 2
          tspan = [0 varargin{2}];
     end        
-    sol = intDExp(B0,tspan,solExp,m,n,F,DF,D2F,true,ltol);        
+    sol = intDExp(dx,dw,tspan,solExp,m,n,F,DF,D2F,true,ltol);        
     B = getDExp(sol,m,tspan(2));
 end
 
@@ -90,10 +91,10 @@ function [B sol] = D2Exp(solExp,B0,U,solw,solu,varargin)
          ltol = varargin{1};
     end
     if isempty(solw)
-        solw = intDExp(B0,[0 1],solExp,m,n,F,DF,D2F,true,ltol);
+        solw = intDExp([],B0,[0 1],solExp,m,n,F,DF,D2F,true,ltol);
     end
     if isempty(solu)
-        solu = intDExp(U,[0 1],solExp,m,n,F,DF,D2F,true,ltol);
+        solu = intDExp([],U,[0 1],solExp,m,n,F,DF,D2F,true,ltol);
     end
     sol = intD2Exp(solExp,solw,solu,m,n,F,DF,D2F,true,ltol);
     B = getD2Exp(sol,m,size(B0,2),size(U,2));
@@ -171,8 +172,25 @@ function [v solExp] = Log(p0,p1,varargin)
 %     end
 end
 
+    % find point on M reasonably close to x 
+    function px = toManifold(x)
+        function [y dy] = lf(x)
+            y = F(x);
+            dy = DF(x);
+        end
+        
+        projOptions = optimset('Jacobian','on','Display','off','TolFun',tol*1e-4,'TolX',tol*1e-4);
+        warning off optim:fsolve:NonSquareSystem
+        px = fsolve(@lf,x,projOptions);
+        assert(norm(F(px)) < epsilon());
+    end
+
     function res = isTangent(V,p)
         res = norm(DF(p)*V) < epsilon();
+    end
+
+    function res = isPoint(p)
+        res = norm(F(p)) < epsilon();
     end
 
     function frame = orthFrame(p)
@@ -182,6 +200,13 @@ end
 manifold.dim = m-n;
 assert(manifold.dim >= 1);
 
+manifold.type = 'embedded';
+manifold.F = F;
+manifold.DF = DF;
+manifold.D2F = D2F;
+manifold.m = m;
+manifold.n = n;
+
 manifold.dist = @distM;
 manifold.Exp = @Exp;
 manifold.DExp = @DExp;
@@ -190,8 +215,10 @@ manifold.D2Exp = @D2Exp;
 manifold.Pt = @Pt;
 manifold.Log = @Log;
 manifold.isTangent = @isTangent;
+manifold.isPoint = @isPoint;
 manifold.orthFrame = @orthFrame;
 manifold.getExp = @(sol,t) getExp(sol,DF,t);
 manifold.getDExp = @(sol,t) getDExp(sol,m,t);
+manifold.toManifold = @toManifold;
 
 end

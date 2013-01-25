@@ -26,7 +26,7 @@ outputDir = 'tmp/output';
 tmpDir = 'tmp/';
 
 % loop over varying curvature contained in list Cs
-Cs = [-1 -2];
+% Cs = [-1 -2];
 l = [];
 for c = Cs
     [Vapprox Vexact sapprox sfletcher sexact angularDiff] = runSurfacePGA(setupfile,outputDir,tmpDir,int2str(c));

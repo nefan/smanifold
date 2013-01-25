@@ -17,36 +17,32 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-% setup file for runSurfacePGA
+% setup file for spherePGA
 
-name = 'linepgatest';
+name = 'spherepga';
 
 m = 3;
 n = 1;
 
-c = sscanf(varargin{1},'%e'); % get coefficient from parameters
-C = [c(1) 1 1]
+C = [1 1 1]
 p = [0; 0; 1];
 B = eye(m,m-n);
 
 tol = 1e-5;
 
-nDraws = 20;
-dataRaw = [-1:1/((nDraws/2-1)/2):1; repmat(0,1,nDraws/2)]*pi*2/4;
+nDraws = 11;
+dataRaw = [-1:1/((nDraws-1)/2):1; repmat(0,1,nDraws)]*pi*3/4;
 shiftM = eye(2);
-v = 1*pi/32+0*pi/2;
+v = 0*pi/32+0*pi/2;
 rotM = [cos(v) -sin(v); sin(v) cos(v)];
 data2d = rotM * shiftM * dataRaw;
-v = -1*pi/32+1*pi/2;
-rotM = [cos(v) -sin(v); sin(v) cos(v)];
-data2d = [data2d rotM * shiftM * dataRaw];
 
 % exact PGA stuff
 global mode;
 mode = 'V';
 
 global debug;
-debug = false;
+debug = true;
 
 global collectfile;
 collectfile = [name '-collect.mat'];

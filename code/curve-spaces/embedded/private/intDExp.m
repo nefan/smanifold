@@ -17,16 +17,19 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function sol = intDExp(B0,tspan,solExp,m,n,F,DF,D2F,quadratic,tol,varargin)
+function sol = intDExp(dx,dw,tspan,solExp,m,n,F,DF,D2F,quadratic,tol,varargin)
 %
-% Compute DExp.
+% Compute DExp with respect to dx (base point) and dw (tangent vector) in
+% Exp_x w
 %
 
 epsilon = 10e-5; % shouldn't be hardcoded
 
 x0 = getExp(solExp,DF,tspan(2));
 dimM = m-n;
-rank = size(B0,2);
+rankx = size(dx,2);
+rankw = size(dw,2);
+rank = rankx+rankw;
 
 backwards = false; % integrate backwards
 if size(varargin,2) >= 1
@@ -97,10 +100,19 @@ end
 if size(varargin,2) >= 2
     y0 = varargin{2};
 else
-    dex0 = reshape(zeros(m,rank),m*rank,1);
-    dep0 = reshape(B0,m*rank,1);    
+    % dx
+    dex0 = reshape(dx,m*rankx,1);    
+    dep0 = reshape(zeros(m,rankx),m*rankx,1);
     
     y0 = [dex0; dep0];
+    
+    % dw
+    dex0 = reshape(zeros(m,rankw),m*rankw,1);
+    dep0 = reshape(dw,m*rankw,1);    
+    
+    y0 = [y0; [dex0; dep0]];
+    
+    assert(size(y0,1) == 2*m*rank);
 end
 
 % integrate
