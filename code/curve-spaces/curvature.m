@@ -42,7 +42,7 @@ ls = [];
 ts = [];
 while abs(c-lastc) > tol
     [x v solExp] = manifold.Exp(p,v1,inttol*t,t);
-    [B solDExp] = manifold.DExp(solExp,v2,inttol*t,t);
+    [B solDExp] = manifold.DExp(solExp,[],v2,inttol*t,t);
     
     lastc = c;
     c = 6/t^3*(t-norm(manifold.getDExp(solDExp,t)));

@@ -90,9 +90,8 @@ for i = 1:N
     dataM(:,i) = y3;
 end
 
-% ...
-p = p+[0 0.4 0]';
-p = manifold.toManifold(p);
+% mean
+% p = manifold.toManifold(p);
 p = intrinsicMean(dataM,manifold,tol,p);
 B = manifold.orthFrame(p);
 

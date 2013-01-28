@@ -51,7 +51,7 @@ sign = 1;
 if mode == 'V'
     sign = -1;
 end
-descent = 'GD'; % Gauss-Newton GN or gradient descent GD
+descent = 'GN'; % Gauss-Newton GN or gradient descent GD
 
 N = size(data,2);
 assert(nr <= manifold.dim);
@@ -90,14 +90,14 @@ function e = expectedPGADiff(mu,x,lLogx,VV)
     % eR
     LeJ = norm(rw); % length of Euclidean Jacobi field
             
-    LJ1 = norm(manifold.DExp(solExp,B*rw));
+    LJ1 = norm(manifold.DExp(solExp,[],B*rw));
     [xx,v,solExp2] = manifold.Exp(mu,B*w);
-    LJ2 = norm(manifold.DExp(solExp,B*rw));
+    LJ2 = norm(manifold.DExp(solExp,[],B*rw));
     %lexpR = 0.5*(LJ1+LJ2);
     lexpR = norm(manifold.Log(y,x));
 
     % eV
-    F = manifold.DExp(solExp,VV);
+    F = manifold.DExp(solExp,[],VV);
     g = -BVV*2*F'*manifold.Log(y,x);
     
     lexpV = norm(pw+g);
@@ -182,7 +182,7 @@ for k = 0:nr-1
     [VVkp skp] = PCA(LogxVkp,false); % regular PCA
     v = Vkp*VVkp(:,end); % initial guess    
 %     v = [0 1]'; % for illustration
-    v = 1/sqrt(2)*[1 1]'; % for illustration
+%     v = 1/sqrt(2)*[1 1]'; % for illustration
     
     p = 0.5; % descent direction decrease factor
     c = 0.25; % for Armijo condition
