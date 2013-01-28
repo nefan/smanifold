@@ -31,7 +31,7 @@ if size(varargin,2) >= 1
 end
 fprintf('   approximated PGA\n');
 tic
-[Vapprox sapprox] = approxPGA(xi,mean,B,manifold);
+[Vapprox sapprox] = approxPGA(xi,mean,manifold);
 toc
 sapprox % debug
 c = curvature(mean,Vapprox(:,1),Vapprox(:,2),manifold,tol);

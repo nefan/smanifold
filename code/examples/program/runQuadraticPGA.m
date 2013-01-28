@@ -90,7 +90,7 @@ for i = 1:N
 end
 
 % approximated PGA
-[Vapprox sapprox] = approxPGA(dataM,p,B,manifold);
+[Vapprox sapprox] = approxPGA(dataM,p,manifold);
 
 % real PGA
 [Vexact sexact sfletcher] = exactPGA(dataM,p,manifold.dim,B,tol,manifold,Vapprox);

@@ -17,34 +17,22 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [V,s,u] = approxPGA(xi,mean,manifold)
-%
-% Compute the PGA (Principal Geodesic Analysis) of
-% the samples xi in T_mean M
-%
-% V and D will be the eigenvalues and eigenvectors resp.
-% of a decomposition of the tangent space T_mean R^m
-%
-% u contains the data projected to the tangent space of the mean
-%
+function optimizer = getNonEucGradOptimizer(varargin)
+ % Limitied memory BGFS optimizer
 
-B = manifold.orthFrame(mean);
-
-N = size(xi,2); % number of points
-
-u = zeros(manifold.dim,N);
-parfor j = 1:N
-    u(:,j) = B'*manifold.Log(mean,xi(:,j));
+if size(varargin,2) > 0
+    userOptions = varargin{1};
+else
+    userOptions = [];
 end
-S = zeros(manifold.dim,manifold.dim);
-for j = 1:N
-    S = S + u(:,j)*u(:,j)';
-end
-S = 1/N*S;
 
-[V,D] = eig(S);
-V(:,end:-1:1) = V;
-V = B*V; % back to coordinates or RR^m
-s = diag(D)';
-s(1,end:-1:1) = s;
-s = cumsum(s);
+% tolerance
+tol = getOption(userOptions,'tol',1e-6);
+
+    function res = BFGSOptimizer(initialData, F, stepF, varargin)
+        res = BFGSg(initialData,F,stepF,tol);
+    end
+
+optimizer = @BFGSOptimizer;
+
+end

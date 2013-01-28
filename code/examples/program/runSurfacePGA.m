@@ -120,7 +120,7 @@ if false
     
     % injectivity radius
     [xx vv solExp] = manifold.Exp(p,[0; pi; 0]);
-    [BB solDExp] = manifold.DExp(solExp,[1; 0; 0]);
+    [BB solDExp] = manifold.DExp(solExp,[],[1; 0; 0]);
     ll = []
     %tt = 0:0.06:1; % for the sphere plot
     tt = 0:0.05:1;

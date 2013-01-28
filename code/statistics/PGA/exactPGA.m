@@ -77,71 +77,13 @@ function r = Fgrad(x,y,w,Logxy,BVk,Bv,BVvp,ltol)
     r = {J,g,Bx};
 end
 
-% expectation
-function e = expectedPGADiff(mu,x,lLogx,VV)
-    assert(isOrthonormal(VV));
-    BVV = B'*VV;
-    w = lLogx;
-    pw = BVV*BVV'*w; % projection to subspace
-    rw = w-pw; % residual
-    
-    [y,v,solExp] = manifold.Exp(mu,B*pw);
-
-    % eR
-    LeJ = norm(rw); % length of Euclidean Jacobi field
-            
-    LJ1 = norm(manifold.DExp(solExp,[],B*rw));
-    [xx,v,solExp2] = manifold.Exp(mu,B*w);
-    LJ2 = norm(manifold.DExp(solExp,[],B*rw));
-    %lexpR = 0.5*(LJ1+LJ2);
-    lexpR = norm(manifold.Log(y,x));
-
-    % eV
-    F = manifold.DExp(solExp,[],VV);
-    g = -BVV*2*F'*manifold.Log(y,x);
-    
-    lexpV = norm(pw+g);
-    
-    e = {norm(rw), lexpR, norm(pw), lexpV, norm(g)};
-end
-
 Logx = [];
 parfor j = 1:N
     Logx(:,j) = B'*manifold.Log(mu,data(:,j),tol);
 end
 
-% measure expected difference
-fprintf('Expectation on difference...\n');
-Vexpect = Vapprox(:,1);
-expR = [];
-expV = [];
-gV = [];
-R = [];
-V = [];
-fun = @expectedPGADiff;
-parfor j = 1:N
-    res = fun(mu,data(:,j),Logx(:,j),Vexpect);
-    R(j) = res{1};
-    expR(j) = res{2};
-    V(j) = res{3};
-    expV(j) = res{4};
-    gV(j) = res{5};
-end
-R % debug
-expR % debug
-%diffR = (R.^2-expR.^2)./sum(R.^2);
-diffR = 1-expR./R;
-%diffV = (V.^2-expV.^2)./sum(V.^2);
-%diffV = gV.^2/sum(V.^2);
-diffV = gV./V;
-estimate = [mean(diffR),std(diffR),mean(diffV),std(diffV),mean(R-expR),std(R-expR),mean(gV),mean(R),mean(V)];
-% fprintf('Expectation (rel diff R/rel std diff R/rel diff V/diff R/std diff R/diff V/R/V):\n\t%e/%e/%e/%e/%e/%e/%e/%e\n', ...
-%     mean(diffR),std(diffR), ...
-%     mean(diffV), ...    
-%     mean(R-expR),std(R-expR), ...
-%     mean(gV),mean(R),mean(V));
-fprintf('Expectation (rho/sigma):\n\t%e/%e\n',mean(gV),std(R-expR));
-clear('expR','expV','gV','R','V');
+% output expected difference
+estimate = expectedPGADiff(data,mu,Logx,nr,B,tol,manifold,Vapprox);
 
 % measure approximated s
 fprintf('Evaluating fletcher PGA...\n');
