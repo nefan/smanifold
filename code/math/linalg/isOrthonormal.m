@@ -25,7 +25,7 @@ function x = isOrthonormal(B)
 n = size(B,2);
 x = true;
 
-tol = 10^-12;
+tol = 10^-6;
 
 for i = 1:n
     vi = B(:,i);

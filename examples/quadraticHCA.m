@@ -17,33 +17,12 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [V,s,u] = approxPGA(xi,mean,B,manifold)
 %
-% Compute the PGA (Principal Geodesic Analysis) of
-% the samples xi in T_mean M
-%
-% V and D will be the eigenvalues and eigenvectors resp.
-% of a decomposition of the tangent space T_mean R^m
-%
-% u contains the data projected to the tangent space of the mean
+% example for running PGA on a 4D quadratic manifold
 %
 
-N = size(xi,2); % number of points
+setupfile = 'examples/setupfiles/qhcatest.m';
+outputDir = 'tmp/output';
+tmpDir = 'tmp/';
 
-u = zeros(manifold.dim,N);
-parfor j = 1:N
-    u(:,j) = B'*manifold.Log(mean,xi(:,j));
-end
-S = zeros(manifold.dim,manifold.dim);
-for j = 1:N
-    S = S + u(:,j)*u(:,j)';
-end
-S = 1/N*S;
-
-[V,D] = eig(S);
-V(:,end:-1:1) = V;
-V = B*V; % back to coordinates or RR^m
-s = diag(D)';
-s(1,end:-1:1) = s;
-s = cumsum(s);
-
+[Vapprox Vexact sapprox sexact] = runQuadraticHCA(setupfile,outputDir,tmpDir);

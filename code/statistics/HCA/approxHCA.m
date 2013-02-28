@@ -17,9 +17,9 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [V,s,u] = approxPGA(xi,mean,B,manifold)
+function [V,s,u] = approxHCA(data,mu,nr,B,manifold)
 %
-% Compute the PGA (Principal Geodesic Analysis) of
+% Compute linearized HCA (Horizontal Component Analysis) of
 % the samples xi in T_mean M
 %
 % V and D will be the eigenvalues and eigenvectors resp.
@@ -28,22 +28,43 @@ function [V,s,u] = approxPGA(xi,mean,B,manifold)
 % u contains the data projected to the tangent space of the mean
 %
 
-N = size(xi,2); % number of points
+N = size(data,2); % number of points
 
-u = zeros(manifold.dim,N);
-parfor j = 1:N
-    u(:,j) = B'*manifold.Log(mean,xi(:,j));
-end
-S = zeros(manifold.dim,manifold.dim);
-for j = 1:N
-    S = S + u(:,j)*u(:,j)';
-end
-S = 1/N*S;
+datak = zeros(nr,N);
+V = [];
+Vp = eye(manifold.dim);
+s = [];
+for k=1:nr
+    u = zeros(manifold.dim-k+1,N);
+    parfor j = 1:N
+        if k > 1
+            datakj = B*V*datak(1:(k-1),j);
+        else
+            datakj = B*zeros(manifold.dim,1);
+        end
+        [xj,vj,solExp] = manifold.Exp(mu,datakj);
+        Bj = manifold.Pt(solExp,B*Vp);
+        u(:,j) = Bj'*manifold.Log(xj,data(:,j));
+    end
+    S = zeros(manifold.dim-k+1,manifold.dim-k+1);
+    for j = 1:N
+        S = S + u(:,j)*u(:,j)';
+    end
+    S = 1/N*S;
 
-[V,D] = eig(S);
-V(:,end:-1:1) = V;
+    [Vk,Dk] = eig(S);
+    Vk(:,end:-1:1) = Vk;
+    sk = diag(Dk)';
+    sk(1,end:-1:1) = sk;
+    
+    v = Vk(:,1);
+    datak(k,:) = v'*u;
+    
+    V = [V Vp*v];
+    Vp = null(V');
+    s = [s sk(1)];
+end
+
 V = B*V; % back to coordinates or RR^m
-s = diag(D)';
-s(1,end:-1:1) = s;
 s = cumsum(s);
 

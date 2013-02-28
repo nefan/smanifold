@@ -17,33 +17,48 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [V,s,u] = approxPGA(xi,mean,B,manifold)
+function [fval,ys,ws,Logxys,rs,linfval,Rs] = exactHCAF(data,datak,v,Fproj,projTol,debug)
 %
-% Compute the PGA (Principal Geodesic Analysis) of
-% the samples xi in T_mean M
-%
-% V and D will be the eigenvalues and eigenvectors resp.
-% of a decomposition of the tangent space T_mean R^m
-%
-% u contains the data projected to the tangent space of the mean
+% evaluate projections
 %
 
-N = size(xi,2); % number of points
+if debug
+    global timeProj;
+end
 
-u = zeros(manifold.dim,N);
+N = size(data,2);
+
+ws = [];
+ys = [];
+Logxys = [];
+rs = [];     
+variances = [];
+Rs = [];
+linVars = [];
+linRs = [];
+% debug
+if debug
+    tic
+end
 parfor j = 1:N
-    u(:,j) = B'*manifold.Log(mean,xi(:,j));
-end
-S = zeros(manifold.dim,manifold.dim);
-for j = 1:N
-    S = S + u(:,j)*u(:,j)';
-end
-S = 1/N*S;
+    x = data(:,j);
+    res = Fproj(x,v,datak(:,j),projTol);
 
-[V,D] = eig(S);
-V(:,end:-1:1) = V;
-V = B*V; % back to coordinates or RR^m
-s = diag(D)';
-s(1,end:-1:1) = s;
-s = cumsum(s);
+    ys(:,j) = res{1};
+    ws(:,j) = res{2};        
+    Logxys(:,j) = res{4}; 
+            
+    variances(j) = sum(ws(:,j).^2);
+    Rs(j) = res{3};   
+    linRs(j) = res{5};    
+end 
+R = sum(Rs);
+linR = sum(linRs);
+% debug
+if debug
+    timeProj = timeProj + toc;
+end        
+
+fval = R/N;
+linfval = linR/N;
 
