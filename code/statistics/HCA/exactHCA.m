@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [V,s,sapprox,sfletcher,estimate,RsDiff] = exactPGA(data,mu,nr,B,tol,manifold,Vapprox)
+function [V,s,coords] = exactHCA(data,mu,nr,B,tol,manifold,Vapprox)
 %
 % Compute exact HCA
 %
@@ -176,6 +176,7 @@ for k = 0:nr-1
             stepErr = 0;
             valErr = 0;
             prevv = v;
+            prevws = ws;
             minIter = 0;
             continue;
         end
@@ -183,7 +184,6 @@ for k = 0:nr-1
         % gradients
         [g Js gs Vvp rs] = exactHCAFgrad(data,datakBV,v,ys,ws,Logxys,rs,Vk,B,k,mode,@Fgrad,gradTol,debug);  
 
-%         Js = sqrt(2/N)*Js; % seems to work better...
         g = 1/N*g; % seems to work nicely :-)
         descentDir = zeros(manifold.dim,1);
         if strcmp(descent,'GD')
@@ -199,7 +199,7 @@ for k = 0:nr-1
                     S(r) = ss;
                 end
                 UU1 = UU(:,1:length(S));
-                descentDir = -1/N*Vvp*VV*diag(1./S)*UU1'*reshape(rs,manifold.dim*N,1); % debug on sign
+                descentDir = -1/sqrt(N)*Vvp*VV*diag(1./S)*UU1'*reshape(rs,manifold.dim*N,1); % debug on sign
             else
                 assert(false);
             end
@@ -252,6 +252,9 @@ end
 
 % shift back to R^m
 V = B*V;
+
+% coordinates
+coords = datak;
 
 % debug
 if debug

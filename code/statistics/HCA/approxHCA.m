@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [V,s,u] = approxHCA(data,mu,nr,B,manifold)
+function [V,s,coords] = approxHCA(data,mu,nr,B,manifold)
 %
 % Compute linearized HCA (Horizontal Component Analysis) of
 % the samples xi in T_mean M
@@ -25,7 +25,6 @@ function [V,s,u] = approxHCA(data,mu,nr,B,manifold)
 % V and D will be the eigenvalues and eigenvectors resp.
 % of a decomposition of the tangent space T_mean R^m
 %
-% u contains the data projected to the tangent space of the mean
 %
 
 N = size(data,2); % number of points
@@ -67,4 +66,4 @@ end
 
 V = B*V; % back to coordinates or RR^m
 s = cumsum(s);
-
+coords = datak;

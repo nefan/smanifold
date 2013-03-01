@@ -19,49 +19,30 @@
 
 % test setup file for runQuadraticHCA
 
-name = 'qhcatest';
+name = 'spherehca';
 
-m = 4;
+m = 3;
 n = 1;
 
-C = [2 -2 1 1]
+C = [1 1 1]
 tol = 1e-4;
 
-p = [0; 0; 0; 1];
+p = [1; 0; 0];
 
 % data
-d1 = [ 0 0 1]';
-d2 = [ 0 0 -1]';
+d1 = [  1 0]';
+d2 = [ -1 0]';
 % generate data
 rng(119); % seed
 nDraws = 128
 dataTM1 = randn(nDraws,m-n)';
 dataTM2 = randn(nDraws,m-n)';
-shiftM = diag([0.4 0.6 0.1])
+shiftM = diag([0.1 0.5])
 %v = 16*pi/32+pi/2;
 %rotM = [cos(v) -sin(v); sin(v) cos(v)];
 rotM = eye(m-n)
-B = eye(m,m-n)
+B = [0 1 0; 0 0 1]'
 
 dataTM1 = rotM * shiftM * dataTM1;
 dataTM2 = rotM * shiftM * dataTM2;
 
-
-% % generate data
-% dataTM = [
-%            1.00  0.00  1; 
-%           -1.00  0.00  1;           
-%            1.00  0.00 -1; 
-%           -1.00  0.00 -1;
-%            0.00  1.00  1; 
-%            0.00 -1.00  1; 
-%            0.00  1.00 -1; 
-%            0.00 -1.00 -1;
-%            ]';
-% shiftM = diag([0.6 0.4  1])
-% %v = 16*pi/32+pi/2;
-% %rotM = [cos(v) -sin(v); sin(v) cos(v)];
-% rotM = eye(m-n)
-% B = eye(m,m-n)
-% 
-% dataTM = rotM * shiftM * dataTM;

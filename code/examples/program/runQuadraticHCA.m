@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [Vapprox Vexact sapprox sexact] = runQuadraticHCA(setupfile,outputDir,tmpDir,varargin)
+function [Vapprox,Vexact,PGAVapprox,sapprox,sexact,PGAsapprox,coordsapprox,coordsexact,PGAcoordsapprox,dataM] = runQuadraticHCA(setupfile,outputDir,tmpDir,varargin)
 %
 % run pga on quadratic manifold
 %
@@ -47,8 +47,7 @@ allDefined = ...
     exist('m') && ...
     exist('n') && ...
     exist('C') && ...
-    exist('p') && ...
-    exist('dataTM');
+    exist('p');
 assert(allDefined,'incorrect setup: missing variables...');
 global prepend
 prepend = fullfile(outputDir,[name '-']);
@@ -77,7 +76,7 @@ end
 % curvature(p,B(:,2),B(:,4),manifold,tol);
 % curvature(p,B(:,3),B(:,4),manifold,tol);
 
-if ~exist('dataTM2','var')
+if exist('dataTM','var')
     % number of samples
     N = size(dataTM,2);
     
@@ -89,7 +88,8 @@ if ~exist('dataTM2','var')
 
         dataM(:,i) = y3;
     end
-else
+end
+if exist('dataTM1','var') && exist('dataTM2','var')
     % bimodal
     N1 = size(dataTM1,2);
     N2 = size(dataTM2,2);
@@ -118,22 +118,39 @@ else
     end
 
 end
+if exist('datauniform','var')
+    % number of samples
+    N = size(datauniform,2);
+    
+    dataM = [];
+    for i = 1:N
+        x2 = datauniform(:,i);
+        [x3 v solExp] = manifold.Exp(p,B(:,1)*x2(1));
+        Bx3 = manifold.Pt(solExp,B);
+        y3 = manifold.Exp(x3,Bx3(:,2:end)*x2(2:end));
+
+        dataM(:,i) = y3;
+    end
+end
 
 % approximated HCA
-[Vapprox sapprox] = approxHCA(dataM,p,2,B,manifold);
+[Vapprox,sapprox,coordsapprox] = approxHCA(dataM,p,manifold.dim,B,manifold);
  
 % approximated PGA
-[PGAVapprox PGAsapprox] = approxPGA(dataM,p,B,manifold);
+[PGAVapprox,PGAsapprox,u] = approxPGA(dataM,p,B,manifold);
+PGAcoordsapprox = PGAVapprox'*B*u;
 
 Vapprox, sapprox
 PGAVapprox, PGAsapprox
 
 % real HCA
-[Vexact sexact] = exactHCA(dataM,p,manifold.dim,B,tol,manifold,Vapprox);
+[Vexact,sexact,coordsexact] = exactHCA(dataM,p,manifold.dim,B,tol,manifold,Vapprox);
+% Vexact = []; sexact = []; coordsexact = [];
 
 Vexact, sexact
 
 % % real PGA
 % [PGAVexact PGAsexact sfletcher] = exactPGA(dataM,p,manifold.dim,B,tol,manifold,PGAVapprox);
+
 
 end
