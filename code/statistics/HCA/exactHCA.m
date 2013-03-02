@@ -177,6 +177,7 @@ for k = 0:nr-1
             valErr = 0;
             prevv = v;
             prevws = ws;
+            prevfval = fval;
             minIter = 0;
             continue;
         end
@@ -199,7 +200,7 @@ for k = 0:nr-1
                     S(r) = ss;
                 end
                 UU1 = UU(:,1:length(S));
-                descentDir = -1/sqrt(N)*Vvp*VV*diag(1./S)*UU1'*reshape(rs,manifold.dim*N,1); % debug on sign
+                descentDir = -1/N*Vvp*VV*diag(1./S)*UU1'*reshape(rs,manifold.dim*N,1); % debug on sign
             else
                 assert(false);
             end
@@ -245,7 +246,7 @@ for k = 0:nr-1
     datak(k+1,:) = prevws;
     V(:,k+1) = prevv;
 %     V(:,k+1) = v; % for illustration
-    s(k+1) = fval;
+    s(k+1) = prevfval;
 
     assert(isOrthonormal(V));
 end

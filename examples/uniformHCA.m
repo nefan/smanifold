@@ -18,7 +18,7 @@
 %  
 
 %
-% example for running PGA on a 4D quadratic manifold
+% example for running HCA of a uniform distribution on a surface
 %
 
 setupfile = 'examples/setupfiles/uniformhca.m';
@@ -35,7 +35,7 @@ evalFile;
 % plot
 figure(1), clf, hold on
 % coords = Vapprox*coordsapprox;
-coords = Vexact*coordsexact
+coords = Vexact*coordsexact;
 coords = coords([2 3],:);
 plot(coords(1,:),coords(2,:),'ro','MarkerSize',6,'MarkerFaceColor','r')
 axis([-pi pi -pi pi])
@@ -43,13 +43,6 @@ grid
 xx=xlim; yy=ylim;
 arrow([xx(1) 0],[xx(2) 0],'Length',10), arrow fixlimits
 arrow([0 yy(1)],[0 yy(2)],'Length',10), arrow fixlimits
-
-% v = sqrt(sapprox(2))*[0 1]';
-% dd = d1;
-% arrow(dd,dd+v,'LineWidth',5,'EdgeColor','b','FaceColor','b');
-% dd = d2;
-% arrow(dd,dd+v,'LineWidth',5,'EdgeColor','b','FaceColor','b');
-
  
 % plot
 figure(2), clf, hold on
@@ -61,9 +54,6 @@ grid
 xx=xlim; yy=ylim;
 arrow([xx(1) 0],[xx(2) 0],'Length',10), arrow fixlimits
 arrow([0 yy(1)],[0 yy(2)],'Length',10), arrow fixlimits
-
-% v = sqrt(PGAsapprox(2))*[0 1]';
-% arrow([0 0],v,'LineWidth',5,'EdgeColor','r','FaceColor','r');
 
 figure(3), hold on
 clf
@@ -103,13 +93,3 @@ for t = [0:0.01:1]
 end
 plot3(xx(1,:),xx(2,:),xx(3,:),'--k','LineWidth',2);
 
-% % components
-% scale = 0.5;
-% [x1 vv sol] = manifold.Exp(p,Vapprox(:,1));
-% v = scale*sqrt(sapprox(2))*Vapprox(:,2);
-% arrow(x1,x1+v,'LineWidth',5,'EdgeColor','b','FaceColor','b');
-% [x1 vv sol] = manifold.Exp(p,-Vapprox(:,1));
-% v = scale*sqrt(sapprox(2))*Vapprox(:,2);
-% arrow(x1,x1+v,'LineWidth',5,'EdgeColor','b','FaceColor','b','MarkerEdgeColor','b','MarkerFaceColor','b');
-% v = -scale*sqrt(sapprox(2))*PGAVapprox(:,2);
-% arrow(p,p+v,'LineWidth',5,'EdgeColor','r','FaceColor','r');

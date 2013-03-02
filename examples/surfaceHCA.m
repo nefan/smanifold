@@ -18,7 +18,7 @@
 %  
 
 %
-% example for running PGA on a 4D quadratic manifold
+% example for running HCA on a surface, bimodal distribution
 %
 
 setupfile = 'examples/setupfiles/surfacehca.m';
@@ -33,7 +33,7 @@ evalFileName = setupfile;
 evalFile;
 
 V = Vexact;
-s = sexact;
+s2 = sexact(1);
 coordsOut = coordsexact;
 
 % plot
@@ -47,7 +47,7 @@ xx=xlim; yy=ylim;
 arrow([xx(1) 0],[xx(2) 0],'Length',10), arrow fixlimits
 arrow([0 yy(1)],[0 yy(2)],'Length',10), arrow fixlimits
 
-v = sqrt(s(2))*[0 1]';
+v = sqrt(s2)*V(:,2);
 dd = d1;
 arrow(dd,dd+v,'LineWidth',5,'EdgeColor','b','FaceColor','b');
 dd = d2;
@@ -65,7 +65,7 @@ xx=xlim; yy=ylim;
 arrow([xx(1) 0],[xx(2) 0],'Length',10), arrow fixlimits
 arrow([0 yy(1)],[0 yy(2)],'Length',10), arrow fixlimits
 
-v = sqrt(PGAsapprox(2))*[0 1]';
+v = sqrt(PGAsapprox(2))*PGAVapprox(:,2);
 arrow([0 0],v,'LineWidth',5,'EdgeColor','r','FaceColor','r');
 
 figure(3), hold on
@@ -74,6 +74,7 @@ clf
 %yrange = [-0.5+min(dataM(2,:)),0.5+max(dataM(2,:))];
 xrange = [-1.1,1.1];
 yrange = [-1.1,1.1];
+zrange = [-1.1,1.1];
 
 II = [1 2 3];
 CC = C(II);
@@ -106,12 +107,12 @@ end
 plot3(xx(1,:),xx(2,:),xx(3,:),'--k','LineWidth',2);
 
 % components
-scale = 0.5;
+scale = 1.0;
 [x1 vv sol] = manifold.Exp(p,V(:,1));
-v = scale*sqrt(s(2))*V(:,2);
+v = scale*sqrt(s2)*V(:,2);
 arrow(x1,x1+v,'LineWidth',5,'EdgeColor','b','FaceColor','b');
 [x1 vv sol] = manifold.Exp(p,-V(:,1));
-v = scale*sqrt(s(2))*V(:,2);
+v = scale*sqrt(s2)*V(:,2);
 arrow(x1,x1+v,'LineWidth',5,'EdgeColor','b','FaceColor','b','MarkerEdgeColor','b','MarkerFaceColor','b');
 v = -scale*sqrt(PGAsapprox(2))*PGAVapprox(:,2);
 arrow(p,p+v,'LineWidth',5,'EdgeColor','r','FaceColor','r');

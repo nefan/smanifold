@@ -34,9 +34,9 @@ d1 = [ 0 0 1]';
 d2 = [ 0 0 -1]';
 % generate data
 rng(119); % seed
-nDraws = 128
-dataTM1 = randn(nDraws,m-n)';
-dataTM2 = randn(nDraws,m-n)';
+nDraws = 2*2^5
+dataTM1 = randn(nDraws/2,m-n)';
+dataTM2 = randn(nDraws/2,m-n)';
 shiftM = diag([0.4 0.6 0.1])
 %v = 16*pi/32+pi/2;
 %rotM = [cos(v) -sin(v); sin(v) cos(v)];

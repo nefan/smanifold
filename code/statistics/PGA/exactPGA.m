@@ -220,6 +220,8 @@ for k = 0:nr-1
             stepErr = 0;
             valErr = 0;
             prevv = v;
+            prevws = ws;
+            prevfval = fval;            
             minIter = 0;
             continue;
         end
@@ -310,7 +312,7 @@ for k = 0:nr-1
     
     V(:,k+1) = prevv;
 %     V(:,k+1) = v; % for illustration
-    s(k+1) = fval;
+    s(k+1) = prevfval;
 
     assert(isOrthonormal(V));
 end
