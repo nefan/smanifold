@@ -47,12 +47,12 @@ xx=xlim; yy=ylim; zz=zlim
 arrow([xx(1) 0 0],[xx(2) 0 0],'Length',10), arrow fixlimits
 arrow([0 yy(1) 0],[0 yy(2) 0],'Length',10), arrow fixlimits
 arrow([0 0 zz(1)],[0 0 zz(2)],'Length',10), arrow fixlimits
-text(xx(2),0.1,0,'x_2','fontsize',20,'horizontalalignment','center');
-text(0,yy(2),0.15,'x_3','fontsize',20,'horizontalalignment','center');
-text(0,0.1,zz(2),'x_1','fontsize',20,'horizontalalignment','center');
+text(xx(2),0.1,0,'x_2','FontSize',40,'horizontalalignment','center');
+text(0,yy(2),0.15,'x_3','FontSize',40,'horizontalalignment','center');
+text(0,0.1,zz(2),'x_1','FontSize',40,'horizontalalignment','center');
 view(73,24)
 
-v = -sqrt(s2)*V(:,2);
+v = sqrt(s2)*V(:,2);
 v = [v(2) v(3) v(1)];
 dd = d1;
 dd = [dd(2) dd(3) dd(1)];
@@ -110,18 +110,17 @@ xx=xlim; yy=ylim; zz=zlim
 arrow([xx(1) 0 0],[xx(2) 0 0],'Length',10), arrow fixlimits
 arrow([0 yy(1) 0],[0 yy(2) 0],'Length',10), arrow fixlimits
 arrow([0 0 zz(1)],[0 0 zz(2)],'Length',10), arrow fixlimits
-text(xx(2),0.1,0,'x_2','fontsize',20,'horizontalalignment','center');
-text(0,yy(2),0.15,'x_3','fontsize',20,'horizontalalignment','center');
-text(0,0.1,zz(2),'x_4','fontsize',20,'horizontalalignment','center');
+text(xx(2),0.3,0,'x_2','FontSize',40,'horizontalalignment','center');
+text(0,yy(2)+0.2,0.15,'x_3','FontSize',40,'horizontalalignment','center');
+text(0,0.3,zz(2),'x_4','FontSize',40,'horizontalalignment','center');
 zoom(0.85)
 
 % V component
-scale = 1.0;
+scale = 2.0;
 [x1 vv sol] = manifold.Exp(p(II),V(II,1));
-v = -scale*sqrt(s2)*V(:,2);
+v = scale*sqrt(s2)*V(:,2);
 arrow(x1,x1+v(II),'LineWidth',5,'EdgeColor','b','FaceColor','b');
 [x1 vv sol] = manifold.Exp(p(II),-V(II,1));
-v = -scale*sqrt(s2)*V(:,2);
 arrow(x1,x1+v(II),'LineWidth',5,'EdgeColor','b','FaceColor','b');
 
 figure(4), clf
@@ -152,16 +151,16 @@ xx=xlim; yy=ylim; zz=zlim
 arrow([xx(1) 0 0],[xx(2) 0 0],'Length',10), arrow fixlimits
 arrow([0 yy(1) 0],[0 yy(2) 0],'Length',10), arrow fixlimits
 arrow([0 0 zz(1)],[0 0 zz(2)],'Length',10), arrow fixlimits
-text(xx(2),0.1,0,'x_1','fontsize',20,'horizontalalignment','center');
-text(0,yy(2),0.15,'x_3','fontsize',20,'horizontalalignment','center');
-text(0,0.1,zz(2),'x_4','fontsize',20,'horizontalalignment','center');
+text(xx(2),0.3,0,'x_1','FontSize',40,'horizontalalignment','center');
+text(0,yy(2)+0.2,0.15,'x_3','FontSize',40,'horizontalalignment','center');
+text(0,0.3,zz(2),'x_4','FontSize',40,'horizontalalignment','center');
 zoom(0.85)
 
 % PGAVapprox component
-scale = 1.0;
+scale = 2.0;
 [x1 vv sol] = manifold.Exp(p(II),PGAVapprox(II,1));
-v = -scale*sqrt(s2)*PGAVapprox(:,2);
+v = scale*sqrt(s2)*PGAVapprox(:,2);
 arrow(x1,x1+v(II),'LineWidth',5,'EdgeColor','r','FaceColor','r');
 [x1 vv sol] = manifold.Exp(p(II),-PGAVapprox(II,1));
-v = -scale*sqrt(s2)*PGAVapprox(:,2);
+v = scale*sqrt(s2)*PGAVapprox(:,2);
 arrow(x1,x1+v(II),'LineWidth',5,'EdgeColor','r','FaceColor','r');
