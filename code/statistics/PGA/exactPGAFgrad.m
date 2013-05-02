@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [g,Js,gs,Vvp] = exactPGAFgrad(data,v,ys,ws,Logxys,rs,Vk,B,k,mode,Fgrad,gradTol,debug)
+function [g,Js,gs,Vvp,rs] = exactPGAFgrad(data,v,ys,ws,Logxys,rs,Vk,B,k,mode,Fgrad,gradTol,debug)
 %
 % evaluate projection gradients
 %

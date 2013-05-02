@@ -125,6 +125,7 @@ for k = 0:nr-1
     v = Vkp*VVkp(:,end); % initial guess    
 %     v = [0 1]'; % for illustration
 %     v = 1/sqrt(2)*[1 1]'; % for illustration
+%     v = [0.5 1]'; v = v/norm(v); % for illustration
     
     p = 0.5; % descent direction decrease factor
     c = 0.25; % for Armijo condition
@@ -225,15 +226,12 @@ for k = 0:nr-1
         end
 
         % gradients
-        [g Js gs Vvp] = exactPGAFgrad(data,v,ys,ws,Logxys,rs,Vk,B,k,mode,@Fgrad,gradTol,debug);
+        if mode == 'V'
+            [g,Js,gs,Vvp] = exactPGAFgrad(data,v,ys,ws,Logxys,rs,Vk,B,k,mode,@Fgrad,gradTol,debug);
+        else % mode == 'R'
+            [g,Js,gs,Vvp,rs] = exactPGAFgrad(data,v,ys,ws,Logxys,rs,Vk,B,k,mode,@Fgrad,gradTol,debug);
+        end
         
-        % debug        
-        if debug && manifold.dim == 2
-            %if firstRun % for illustration
-                exactPGA2DimVis(mu,B,v,ws,gs,Logx,i,N,manifold)
-            %end
-        end     
-
         %Js = sqrt(2/N)*Js; % seems to work better...
         g = 1/N*g; % seems to work nicely :-)
         descentDir = zeros(manifold.dim,1);
@@ -273,6 +271,20 @@ for k = 0:nr-1
         prevg = g;
         prevgn = gn;
         
+        % debug
+        if true % debug
+            fprintf('it %d,%d: %e, %e, %e, %e, %e, %e, %e\n',...
+                k,i,fval,gn,valErr,stepErr,abs(fval-approxPGAfval),abs(fval-approxPGAfval)*100/approxPGAfval,acos(abs(dot(prevv,approxPGAv)))*360/(2*pi));
+%             fname = [prepend 'exact-PGA-k-' int2str(k) '-i-' int2str(i) '.mat'];
+%             save(fname,'data','mu','i','Vk','v','B','ys','ws','prevv','g','prevg','fval','prevfval','descentDir','sign','alpha','limitFactor','tol','approxPGAfval','approxPGAv','projTol','gradTol','mode');                         
+        end
+                
+        if debug && manifold.dim == 2
+            %if firstRun % for illustration
+                exactPGA2DimVis(mu,B,v,ws,gs,Logx,i,N,manifold)
+            %end
+        end            
+        
         % update        
         v = v + alpha*sign*limitFactor*descentDir;
         v = v/norm(v); % project to unit sphere        
@@ -284,14 +296,7 @@ for k = 0:nr-1
         % control
         firstRun = false;
         reRun = false;
-        i = i+1;
-        % debug
-        if true % debug
-            fprintf('it %d,%d: %e, %e, %e, %e, %e, %e, %e\n',...
-                k,i,fval,gn,valErr,stepErr,abs(fval-approxPGAfval),abs(fval-approxPGAfval)*100/approxPGAfval,acos(abs(dot(prevv,approxPGAv)))*360/(2*pi));
-%             fname = [prepend 'exact-PGA-k-' int2str(k) '-i-' int2str(i) '.mat'];
-%             save(fname,'data','mu','i','Vk','v','B','ys','ws','prevv','g','prevg','fval','prevfval','descentDir','sign','alpha','limitFactor','tol','approxPGAfval','approxPGAv','projTol','gradTol','mode');                         
-        end
+        i = i+1;         
     end
         
     % debug

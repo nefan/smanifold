@@ -50,15 +50,11 @@ allDefined = ...
     exist('m') && ...
     exist('n') && ...
     exist('C') && ...
-    exist('p') && ...
-    exist('data2d');
+    exist('p');
 assert(allDefined,'incorrect setup: missing variables...');
 global prepend
 prepend = fullfile(outputDir,[name '-']);
 printFig = @(name) print([prepend name '.ps'],'-dps');
-
-% number of samples
-N = size(data2d,2);
 
 format short e;
 
@@ -75,19 +71,44 @@ else
 	assert(manifold.isTangent(B,p));
 end
 
-% data
-figure(2)
-clf
-plot(data2d(1,:),data2d(2,:),'r*','MarkerSize',10);
-axis equal
-
 dataM = [];
-for i = 1:N
-    x2 = data2d(:,i);
-    [x v] = manifold.Exp(p,B*x2);
-    y3 = x;
-        
-    dataM(:,i) = y3;
+if exist('data2d','var')    
+    % number of samples
+    N = size(data2d,2);
+
+    % data
+    figure(2)
+    clf
+    plot(data2d(1,:),data2d(2,:),'r*','MarkerSize',10);
+    axis equal   
+    
+    for i = 1:N
+        x2 = data2d(:,i);
+        [x v] = manifold.Exp(p,B*x2);
+        y3 = x;
+
+        dataM(:,i) = y3;
+    end
+end
+if exist('datauniform','var')
+    % number of samples
+    N = size(datauniform,2);
+
+    % data
+    figure(2)
+    clf
+    plot(datauniform(1,:),datauniform(2,:),'r*','MarkerSize',10);
+    axis equal    
+    
+    dataM = [];
+    for i = 1:N
+        x2 = datauniform(:,i);
+        [x3 v solExp] = manifold.Exp(p,B(:,1)*x2(1));
+        Bx3 = manifold.Pt(solExp,B);
+        y3 = manifold.Exp(x3,Bx3(:,2:end)*x2(2:end));
+
+        dataM(:,i) = y3;
+    end
 end
 
 % mean
