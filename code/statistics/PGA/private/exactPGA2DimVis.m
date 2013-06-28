@@ -34,11 +34,12 @@ hold off
 figure(1), hold on
 axis([-2.5 2.5 -2.5 2.5 -2.5 2.5])
 % for PGAalgIllustration
-if it == 25        
+if it == 25 || it == 4
     for i = 1:N
         xi = manifold.Exp(mu,B*Logx(:,i));
         pxi = manifold.Exp(mu,B*ws(:,i));
-        plot3(pxi(1,:),pxi(2,:),pxi(3,:),'bo','MarkerSize',10,'MarkerFaceColor','b');
+        h = plot3(pxi(1,:),pxi(2,:),pxi(3,:),'bo','MarkerSize',10,'MarkerFaceColor','b');
+        uistack(h,'bottom')
         [xx vv sol] = manifold.Exp(xi,manifold.Log(xi,pxi));
         xx = [];
         for t = [0:0.01:1]
@@ -46,15 +47,26 @@ if it == 25
         end
         plot3(xx(1,:),xx(2,:),xx(3,:),'--k','LineWidth',1);
         
-        [xx vv sol] = manifold.Exp(mu,B*2*pi*v);
+        [xx vv sol] = manifold.Exp(mu,B*1.2*pi*v);
         xx = [];
-        for t = [0:0.05:1]
+        for t = [0:0.1:1]
             xx = [xx manifold.getExp(sol,t)];
         end
-        plot3(xx(1,:),xx(2,:),xx(3,:),'k','LineWidth',2.5);        
+        plot3(xx(1,:),xx(2,:),xx(3,:),'k','LineWidth',2.5);    
+        [xx vv sol] = manifold.Exp(mu,-B*1.2*pi*v);
+        xx = [];
+        for t = [0:0.1:1]
+            xx = [xx manifold.getExp(sol,t)];
+        end
+        plot3(xx(1,:),xx(2,:),xx(3,:),'k','LineWidth',2.5);  
     end
-    quiver3(0,0,1,1,0,0,'r','LineWidth',4.0)
-    quiver3(0,0,1,0,1,0,'k','LineWidth',3.0)
+%     quiver3(0,0,1,1,0,0,'r','LineWidth',4.0)
+%     quiver3(0,0,1,0,1,0,'k','LineWidth',3.0)
+%     quiver3(mu(1),mu(2),mu(3),B(1,2),B(2,2),B(3,2),'r','LineWidth',4.0)
+    Bv = B*v;
+%     quiver3(mu(1),mu(2),mu(3),Bv(1),Bv(2),Bv(3),'k','LineWidth',5.0)
+    arrow([mu(1),mu(2),mu(3)],1.3*[Bv(1),Bv(2),Bv(3)]+[mu(1),mu(2),mu(3)],'FaceColor','k','LineWidth',5.0)
+    view(24,64)
 end
 if it == 0 % sphere illustration
     [xx vv sol] = manifold.Exp(mu,B*2*pi*[0 1]');
