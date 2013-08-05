@@ -30,11 +30,11 @@ tol = 1e-4;
 p = [0; 0; 0; 1];
 
 % data
-d1 = [ 0 0 1]';
-d2 = [ 0 0 -1]';
+d1 = [ 0 0 1]'
+d2 = [ 0 0 -1]'
 % generate data
 rng(119); % seed
-nDraws = 2*2^5
+nDraws = 2*2^6
 dataTM1 = randn(nDraws/2,m-n)';
 dataTM2 = randn(nDraws/2,m-n)';
 shiftM = diag([0.4 0.6 0.1])

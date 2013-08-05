@@ -133,6 +133,12 @@ if exist('datauniform','var')
     end
 end
 
+
+% mean
+% p = manifold.toManifold(p);
+p = intrinsicMean(dataM,manifold,tol,p);
+B = manifold.orthFrame(p);
+
 % approximated HCA
 [Vapprox,sapprox,coordsapprox] = approxHCA(dataM,p,manifold.dim,B,manifold);
  

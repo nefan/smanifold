@@ -55,25 +55,30 @@ minProjTol = 1e-7*tol/N;
 minGradTol = 1e-7*tol/N;
 
 % projection
-function r = Fproj(x,v,datak,ltol)
-    [xk,vk,solExp] = manifold.Exp(mu,datak);
-    Bxkv = manifold.Pt(solExp,B*v);
+function r = Fproj(x,v,Vk,datakBV,ltol)
+    if ~isempty(Vk)
+        BVk = B*Vk;
+    else 
+        BVk = [];
+    end    
+    [xk,Bxkv,BxkVk] = HCALinToMan(datakBV,mu,BVk,B*v,manifold);
     [y,w,R,Logxky,w0] = geodesicSubspaceProjection(x,xk,Bxkv,[],ltol,manifold);
     w = Bxkv'*w; % to v basis
     linR = sum(manifold.Log(manifold.Exp(xk,w0),x).^2);
-    r = {y,w,R,Logxky,linR};   
+    r = {y,w,R,Logxky,linR};
 end
 
 % gradient
-function r = Fgrad(x,datak,y,w,Logxy,Vk,v,Vvp,ltol)   
-    [xk,vk,solExp] = manifold.Exp(mu,datak);
-    Bxk = manifold.Pt(solExp,B);
+function r = Fgrad(x,datakBV,y,w,Logxy,Vk,v,Vvp,ltol)   
     if ~isempty(Vk)
-        BxkVk = Bxk*Vk;
+        BVk = B*Vk;
     else 
-        BxkVk = [];
-    end
-    [J,g,Bx] = geodesicSubspaceLogGradient(x,xk,y,Bxk*v*w,Logxy,BxkVk,Bxk*v,Bxk*Vvp,ltol,mode,manifold);
+        BVk = [];
+    end    
+    [xk,M,BxkVk] = HCALinToMan(datakBV,mu,BVk,[B*v B*Vvp],manifold);    
+    Bxkv = M(:,1);
+    BxkVvp = M(:,2:end);
+    [J,g,Bx] = geodesicSubspaceLogGradient(x,xk,y,Bxkv*w,Logxy,BxkVk,Bxkv,BxkVvp,ltol,mode,manifold);
     r = {J,g,Bx};
 end
 
@@ -82,7 +87,7 @@ parfor j = 1:N
     Logx(:,j) = B'*manifold.Log(mu,data(:,j),tol);
 end
 
-datak = zeros(nr,N);
+dataBV = zeros(nr,N);
 V = []; % orthonormal basis for V_k
 s = []; % variances
 % debug
@@ -135,11 +140,11 @@ for k = 0:nr-1
         
         % projections
         if k > 0
-            datakBV = B*V*datak(1:k,:);
+            datak = B*V*dataBV(1:k,:);
         else
-            datakBV = B*zeros(manifold.dim,N);
+            datak = B*zeros(manifold.dim,N);
         end
-        [fval ys ws Logxys rs linfval xxRs] = exactHCAF(data,datakBV,v,@Fproj,projTol,debug);
+        [fval ys ws Logxys rs linfval xxRs] = exactHCAF(data,dataBV(1:k,:),v,Vk,@Fproj,projTol,debug);
 
         if not(firstRun || reRun) % Armijo condition            
             assert(c*alpha*limitFactor*prevg'*descentDir < epsilon); % descent condition
@@ -183,7 +188,7 @@ for k = 0:nr-1
         end
 
         % gradients
-        [g Js gs Vvp rs] = exactHCAFgrad(data,datakBV,v,ys,ws,Logxys,rs,Vk,B,k,mode,@Fgrad,gradTol,debug);  
+        [g Js gs Vvp rs] = exactHCAFgrad(data,dataBV(1:k,:),v,ys,ws,Logxys,rs,Vk,B,k,mode,@Fgrad,gradTol,debug);  
 
         g = 1/N*g; % seems to work nicely :-)
         descentDir = zeros(manifold.dim,1);
@@ -243,7 +248,7 @@ for k = 0:nr-1
         end
     end
     
-    datak(k+1,:) = prevws;
+    dataBV(k+1,:) = prevws;
     V(:,k+1) = prevv;
 %     V(:,k+1) = v; % for illustration
     s(k+1) = prevfval;
@@ -255,7 +260,7 @@ end
 V = B*V;
 
 % coordinates
-coords = datak;
+coords = dataBV;
 
 % debug
 if debug

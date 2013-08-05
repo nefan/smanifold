@@ -17,48 +17,25 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [fval,ys,ws,Logxys,rs,linfval,Rs] = exactHCAF(data,datakBV,v,V,Fproj,projTol,debug)
+function [xk,Bxk,Vxk] = HCALinToMan(xV,mu,V,B,manifold)
 %
-% evaluate projections
+% map from linearization to manifold
 %
+% xV - coordinates
+% V - HCA basis vectors
+% B - vector/matrix to be transported along path
+%
+% xk - mapped point
+% Bxk - transported B
+% Vxk - transported V
 
-if debug
-    global timeProj;
+D = length(xV);
+xk = mu;  
+Vxk = V;
+Bxk = B;
+for d = 1:D % propagate trought horz. components
+    [xk,vk,solExp] = manifold.Exp(xk,Vxk(:,d)*xV(d));
+    M = manifold.Pt(solExp,[Vxk Bxk]);
+    Vxk = M(:,1:D);
+    Bxk = M(:,(D+1):end);
 end
-
-N = size(data,2);
-
-ws = [];
-ys = [];
-Logxys = [];
-rs = [];     
-variances = [];
-Rs = [];
-linVars = [];
-linRs = [];
-% debug
-if debug
-    tic
-end
-parfor j = 1:N
-    x = data(:,j);
-    res = Fproj(x,v,V,datakBV(:,j),projTol);
-
-    ys(:,j) = res{1};
-    ws(:,j) = res{2};        
-    Logxys(:,j) = res{4}; 
-            
-    variances(j) = sum(ws(:,j).^2);
-    Rs(j) = res{3};   
-    linRs(j) = res{5};    
-end 
-R = sum(Rs);
-linR = sum(linRs);
-% debug
-if debug
-    timeProj = timeProj + toc;
-end        
-
-fval = R/N;
-linfval = linR/N;
-
