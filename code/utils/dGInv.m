@@ -22,9 +22,12 @@ function dGInvA = dGInv(A,GInvA,dA)
 % derivative of generalized inverse, confer Decell '72
 %
 
-assert(all(size(A) == size(dA)));
+assert(size(A,1) == size(dA,1));
+assert(size(A,2) == size(dA,2));
     
-dAtrans = dA';
+dAtrans = permute(dA,[2 1 3]);
 GInvAtrans = GInvA';
-T = dAtrans*GInvAtrans*GInvA+GInvA*GInvAtrans*dAtrans;
-dGInvA = -GInvA*dA*GInvA+T-GInvA*A*T*A*GInvA;
+% T = dAtrans*GInvAtrans*GInvA+GInvA*GInvAtrans*dAtrans;
+% dGInvA = -GInvA*dA*GInvA+T-GInvA*A*T*A*GInvA;
+T = mtimesx(dAtrans,GInvAtrans*GInvA)+mtimesx(GInvA*GInvAtrans,dAtrans);
+dGInvA = -mtimesx(mtimesx(GInvA,dA),GInvA)+T-mtimesx(mtimesx(GInvA*A,T),A*GInvA);

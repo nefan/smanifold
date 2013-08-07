@@ -51,12 +51,67 @@ function dy = G(t,y)
     D2Fx = D2F(x);
     GInvDFx = GInv(DFx);
     DFxtrans = DFx';
+    GInvDFxtrans = GInvDFx';
+    
+    mu = -GInvDFxtrans*p;
+
+    % x
+    dx = p-GInvDFx*DFx*p;
+    D2Fxdx = D2Fx*dx;
+    D2Fxdx = reshape(D2Fxdx,n,m);     
+    
+    % p
+    %D2Fxdx = reshape(D2Fx*dx,n,m);
+    %dp = -D2Fxdx'*mu; 
+    
+    % dexp            
+    D2Fxdex = D2Fx*dex;
+    deDFx = reshape(D2Fxdex,n,m,rank);
+    deGInvDFx = dGInv(DFx,GInvDFx,deDFx);
+    deGInvDFxDFx = mtimesx(deGInvDFx,DFx)+mtimesx(GInvDFx,deDFx);
+    dedx = dep-reshape(mtimesx(deGInvDFxDFx,p),m,rank)-mtimesx(GInvDFx*DFx,dep);
+
+    demu = -reshape(mtimesx(deGInvDFx,'T',p),n,rank)-mtimesx(GInvDFxtrans,dep);
+
+    D2Fxdedx = reshape(D2Fx*dedx,n,m,rank);            
+    assert(quadratic); % non-quadratic case not implemented           
+    dedp = -D2Fxdx'*demu-reshape(mtimesx(D2Fxdedx,'T',mu),m,rank); % add 3rd derivative component for non-quadratic F here
+            
+    ddex = reshape(dedx,m*rank,1);
+    ddep = reshape(dedp,m*rank,1);     
+    
+    dy = [ddex; ddep];
+    
+    if false % true for debug
+        dytest = Gtest(t,y);
+        err = norm(dy-dytest);
+        assert(err < 1e-8);
+    end
+end
+
+function dy = Gtest(t,y)
+    dex = reshape(y(1:rank*m),m,rank); % z
+    dep = reshape(y(numel(dex)+1:numel(dex)+rank*m),m,rank); % y
+    
+    if dimM == m % Eucledian
+        dy = [y(m*rank+1:end,1); zeros(m*rank,1)];
+        return;
+    end        
+        
+    [x v p] = getExp(solExp,DF,t);        
+    
+    DFx = DF(x);
+    D2Fx = D2F(x);
+    GInvDFx = GInv(DFx);
+    DFxtrans = DFx';
     GInvDFxtrans = GInv(DFxtrans);
     
     mu = -GInv(DFx')*p;
 
     % x
     dx = p-GInvDFx*DFx*p;
+    D2Fxdx = D2Fx*dx;
+    D2Fxdx = reshape(D2Fxdx,n,m);     
     
     % p
     %D2Fxdx = reshape(D2Fx*dx,n,m);
@@ -74,11 +129,9 @@ function dy = G(t,y)
         deiGInvDFx = dGInv(DFx,GInvDFx,deiDFx);
         deiGInvDFxDFx = deiGInvDFx*DFx+GInvDFx*deiDFx;
         deidx = deip-deiGInvDFxDFx*p-GInvDFx*DFx*deip;
-            
+        
         deimu = -dGInv(DFxtrans,GInvDFxtrans,deiDFx')*p-GInvDFxtrans*deip;
-
-        D2Fxdx = D2Fx*dx;
-        D2Fxdx = reshape(D2Fxdx,n,m);                    
+                   
         D2Fxdeidx = reshape(D2Fx*deidx,n,m);            
         assert(quadratic); % non-quadratic case not implemented           
         deidp = -D2Fxdx'*deimu-D2Fxdeidx'*mu; % add 3rd derivative component for non-quadratic F here
@@ -88,7 +141,7 @@ function dy = G(t,y)
         ddep(:,i) = deidp;
     end
     ddex = reshape(ddex,m*rank,1);
-    ddep = reshape(ddep,m*rank,1);        
+    ddep = reshape(ddep,m*rank,1);    
     
     dy = [ddex; ddep];
 end
