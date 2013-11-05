@@ -22,7 +22,9 @@ https://github.com/nefan/smanifold.git
 
 Installation intructions:
 
-smanifold has no external dependencies at this point.
+Please download mtimesx 
+http://www.mathworks.com/matlabcentral/fileexchange/25977-mtimesx-fast-matrix-multiply-with-multi-dimensional-support
+, extract it into the 'thirdparty' folder, and compile.
 
 smanifold can be tested by starting MATLAB in the directory containing this
 file and running 'surfacePGA'. If 'startup.m' is not executed automatically upon
