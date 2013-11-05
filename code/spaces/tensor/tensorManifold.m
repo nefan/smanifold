@@ -17,28 +17,21 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function manifold = embeddedManifold(m,n,F,DF,D2F,tol)
+function manifold = tensorManifold(n)
 %
-% Wrapper function exporting Exp and Log maps
-% for submanifold defined by F
+% PD(n) tensor manifold
 %
-% Function LogInit behaves as Log except that
-% it uses an initial curve joining the points
-% to overcome limitations of shooting method.
+% metric at eye(n) transported to entire group
 %
 
 % Exponential map
 function [x,v,sol] = Exp(x0,v0,varargin)
-    ltol = tol;
-    tspan = [0 1];
-    if size(varargin,2) >= 1
-         ltol = varargin{1};
-    end
     if size(varargin,2) >= 2
          tspan = [0 varargin{2}];
     end    
-    sol = intExp(x0,v0,tspan,m,n,F,DF,D2F,ltol);
-    [x v] = getExp(sol,DF,tspan(2));
+    sol = [];
+    x = PDExp(x0,tspan*v0);
+    v = PD
 end
 
 % DExp
