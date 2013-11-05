@@ -17,7 +17,7 @@
 %  along with smanifold.  If not, see <http://www.gnu.org/licenses/>.
 %  
 
-function [V,s,sapprox,sfletcher,estimate,RsDiff] = exactPGA(data,mu,nr,B,tol,manifold,Vapprox)
+function [V,s,sapprox,sfletcher,estimate,RsDiff,dataBV] = exactPGA(data,mu,nr,B,tol,manifold,Vapprox)
 %
 % Compute exact PGA
 %
@@ -102,6 +102,7 @@ end
 sapprox % debug
 sfletcher % debug
 
+dataBV = zeros(nr,manifold.dim,N);
 V = []; % orthonormal basis for V_k
 s = []; % variances
 % debug
@@ -272,6 +273,7 @@ for k = 0:nr-1
         prevv = v;
         prevg = g;
         prevgn = gn;
+        prevws = ws;
         
         % debug
         if true % debug
@@ -286,7 +288,7 @@ for k = 0:nr-1
                 exactPGA2DimVis(mu,B,v,ws,gs,Logx,i,N,manifold)
             %end
         end            
-        
+                
         % update        
         v = v + alpha*sign*limitFactor*descentDir;
         v = v/norm(v); % project to unit sphere        
@@ -315,6 +317,7 @@ for k = 0:nr-1
 		close(4)
     end 
     
+    dataBV(k+1,:,:) = prevws;
     V(:,k+1) = prevv;
 %     V(:,k+1) = v; % for illustration
     s(k+1) = prevfval;

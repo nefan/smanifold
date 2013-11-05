@@ -36,6 +36,6 @@ Bxk = B;
 for d = 1:D % propagate trought horz. components
     [xk,vk,solExp] = manifold.Exp(xk,Vxk(:,d)*xV(d));
     M = manifold.Pt(solExp,[Vxk Bxk]);
-    Vxk = M(:,1:D);
-    Bxk = M(:,(D+1):end);
+    Vxk = M(:,1:size(Vxk,2));
+    Bxk = M(:,(size(Vxk,2)+1):end);
 end

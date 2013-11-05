@@ -254,6 +254,8 @@ for k = 0:nr-1
     s(k+1) = prevfval;
 
     assert(isOrthonormal(V));
+    global outputDir;
+    save([outputDir '/hca-red-it-' int2str(k) '.mat'],'V','s','dataBV')
 end
 
 % shift back to R^m
