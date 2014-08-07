@@ -24,7 +24,9 @@ Installation intructions:
 
 Please download mtimesx 
 http://www.mathworks.com/matlabcentral/fileexchange/25977-mtimesx-fast-matrix-multiply-with-multi-dimensional-support
-, extract it into the 'thirdparty' folder, and compile.
+, extract it into the 'thirdparty' folder, and compile. The compile command
+    mex CFLAGS="\$CFLAGS -std=c99" -DDEFINEUNIX -largeArrayDims -lmwblas mtimesx.c 
+may solve some compile problems.
 
 smanifold can be tested by starting MATLAB in the directory containing this
 file and running 'surfacePGA'. If 'startup.m' is not executed automatically upon
