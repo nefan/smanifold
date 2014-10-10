@@ -71,10 +71,6 @@ else
 	assert(manifold.isTangent(B,p));
 end
 
-% number of samples
-N = 1000;
-K = 20; % Brownian steps
-
 % data
 R = chol(covTM);
 dataTM = reshape((randn(N*K,2)*R)',2,K,N)/K;
@@ -87,16 +83,18 @@ end
 axis([-pi,pi,-pi,pi])
 axis equal    
     
-dataM = zeros(3,K,N);
+KK = K;
+NN = N;
+dataM = zeros(3,KK,NN);
 pp = p;
-parfor i = 1:N
+parfor i = 1:NN
     x = pp;
     Bx = B;
-    for k = 1:K
+    for k = 1:KK
         x2 = dataTM(:,k,i);
         [x v solExp] = manifold.Exp(x,Bx*x2);
         Bx = manifold.Pt(solExp,Bx);
-
+        
         dataM(:,k,i) = x;
     end
 end
@@ -171,9 +169,10 @@ if visible
     figure(5)
     clf, hold on
     [h,canvas]=cloudPlot(cumsum(dataTM(1,:,Ix),2),cumsum(dataTM(2,:,Ix),2),[-.5 2.5 -1.5 1.5],[],[20 20]); colormap gray; colormap(flipud(colormap))
-    plot(sum(meanTMTx(1,:),2),sum(meanTMTx(2,:),2),'ko','MarkerSize',20,'MarkerFaceColor','r');
-    plot(xTM(1),xTM(2),'go','MarkerSize',20,'MarkerFaceColor','g');
+    plot(sum(meanTMTx(1,:),2),sum(meanTMTx(2,:),2),'ko','MarkerSize',20,'MarkerFaceColor','r');    
     plot([0 cumsum(meanTMTx(1,:),2)],[0 cumsum(meanTMTx(2,:),2)],'r-','LineWidth',10);
+    plot(xTM(1),xTM(2),'go','MarkerSize',20,'MarkerFaceColor','g');
+    plot([0 xTM(1)],[0 xTM(2)],'k--','LineWidth',3)
     
 end
 

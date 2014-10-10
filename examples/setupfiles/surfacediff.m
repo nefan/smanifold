@@ -25,8 +25,8 @@ m = 3;
 n = 1;
 
 % C = [1 1 1] % sphere
-% C = [1 0 1] % cylinder
-C = [-2 1 1] % elliptical hyperboloid
+C = [1 0 1] % cylinder
+% C = [-2 1 1] % elliptical hyperboloid
 tol = 1e-4;
 
 p = [0; 0; 1];
@@ -36,6 +36,10 @@ covTM = pi*diag([4^2 1.^2])
 % covTM = pi*diag([4^2 1.3^2])
 % covTM = pi*diag([4^2 1^2])
 
-xTM = [9/16*pi,3/8*pi]' % sphere and elliptical hyperboloid
-% xTM = [9/16*pi,1/8*pi]' % cylinder
-r = .2;
+% xTM = [7/16*pi,3/8*pi]' % sphere and elliptical hyperboloid
+xTM = [9/16*pi,2/8*pi]' % cylinder
+r = .2
+
+% number of samples
+N = 50000 % hyperboloid: 50e3, sphere: 15e3
+K = 20 % Brownian steps
